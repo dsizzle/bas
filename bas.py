@@ -1,9 +1,6 @@
 #
-# dist_sub.py
+# bas.py
 #
-# This script automatically sets subdivision levels for
-# objects with a Subdivision modifier, based on their distance
-# from the camera. 
 #
 bl_info = { "name": "Blender Auto Studio", 
             "description": "Makes cahs",
