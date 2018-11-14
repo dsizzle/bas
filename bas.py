@@ -121,8 +121,8 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         rear_overhang = (diam * scene.RearOverhang) 
         overhang_diff = rear_overhang - front_overhang
         height = diam * 1.75
-        shoulder_height = diam * 1.3
-        shoulder_width = diam * 1.2
+        top_line_height = diam * 1.3
+        top_line_width = diam * 1.2
         roof_width = diam * scene.RoofWidth
         windshield_angle = scene.WindshieldAngle
 
@@ -234,17 +234,17 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(roof_width - 1.0, 0, 0))
 
-        bpy.ops.object.vertex_group_set_active(group='hip_vertices')
+        bpy.ops.object.vertex_group_set_active(group='shoulder_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, diam * 1.1 - .75))
+        bpy.ops.transform.translate(value=(0, 0, diam * 1.05 - .75))
 
         bpy.ops.object.vertex_group_set_active(group='skirt_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(0, 0, quarter_diam))
 
-        bpy.ops.object.vertex_group_set_active(group='midline_vertices')
+        bpy.ops.object.vertex_group_set_active(group='mid_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(0, 0, quarter_diam + half_diam - 0.5))
@@ -254,21 +254,19 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(0, 0, height - 2.0))
 
-        bpy.ops.object.vertex_group_set_active(group='shoulder_vertices')
+        bpy.ops.object.vertex_group_set_active(group='top_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, shoulder_height - 1.0))
+        bpy.ops.transform.translate(value=(0, 0, top_line_height - 1.0))
 
         bpy.ops.object.vertex_group_set_active(group='centerline_vertices')
         bpy.ops.object.vertex_group_deselect()
-        bpy.ops.transform.translate(value=(shoulder_width - 1.0, 0, 0))
+        bpy.ops.transform.translate(value=(top_line_width - 1.0, 0, 0))
  
         windshield_rads = math.radians(windshield_angle)
-        base_y = (shoulder_height - half_diam) / math.tan(windshield_rads)
-        print(math.tan(windshield_rads), base_y)
+        base_y = (top_line_height - half_diam) / math.tan(windshield_rads)
         top_y = (height - half_diam) / math.tan(windshield_rads)
-        print(top_y)
-
+        
         bpy.ops.object.vertex_group_set_active(group='windshield_base_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
