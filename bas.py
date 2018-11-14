@@ -35,15 +35,33 @@ bpy.types.Scene.Wheelbase = FloatProperty(
     description = "Number of wheels between wheels",
     default = 3.0)
 
+bpy.types.Scene.VehicleWidth = FloatProperty(
+    name = "Vehicle Width",
+    description = "Width of vehicle based on wheel size",
+    default = 1.5)
+
+bpy.types.Scene.RoofWidth = FloatProperty(
+    name = "Roof Width",
+    description = "Width of roof based on wheel size",
+    default = 0.8)
+
 bpy.types.Scene.FrontOverhang = FloatProperty(
     name = "Front Overhang",
     description = "Number of wheels in front of front wheel",
-    default = 0.5)
+    default = 0.5,
+    min = 0.25, max = 2.5)
 
 bpy.types.Scene.RearOverhang = FloatProperty(
     name = "Rear Overhang",
     description = "Number of wheels to rear of rear wheel",
-    default = 0.5)
+    default = 0.5,
+    min = 0.25, max = 2.5)
+
+bpy.types.Scene.WindshieldAngle = FloatProperty(
+    name = "Windshield Angle",
+    description = "Angle of windshield",
+    default = 40.0,
+    min = 20.0, max = 89.0)
     
 bpy.types.Scene.MinSubd = IntProperty(
     name = "Min. SubD level",
@@ -68,10 +86,16 @@ class ToolPropsPanel(bpy.types.Panel):
         self.layout.prop(scene, 'TireWidth')
         self.layout.prop(scene, 'TireDiameter')
         self.layout.prop(scene, 'WheelDiameter')
+        self.layout.separator()
+
         self.layout.prop(scene, 'Wheelbase')
         self.layout.prop(scene, 'FrontOverhang')
         self.layout.prop(scene, 'RearOverhang')
+        self.layout.prop(scene, 'VehicleWidth')
+        self.layout.prop(scene, 'RoofWidth')
         
+        self.layout.prop(scene, 'WindshieldAngle')
+
         self.layout.separator()
         self.layout.prop(scene, 'AllObjects')
         self.layout.operator('execute.makecar')
@@ -92,13 +116,15 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         sidewall_diam = ((diam / 2.) + wheel_diam) / 2.0
         width = scene.TireWidth / 1000.0
         dist_from_center_y = (diam * scene.Wheelbase) / 2. + (diam / 2.)
-        dist_from_center_x = (diam * 1.25) - (width / 2.)
+        dist_from_center_x = (diam * scene.VehicleWidth) - (width / 2.)
         front_overhang = (diam * scene.FrontOverhang) 
         rear_overhang = (diam * scene.RearOverhang) 
         overhang_diff = rear_overhang - front_overhang
         height = diam * 1.75
         shoulder_height = diam * 1.3
-        windshield_angle = 40
+        shoulder_width = diam * 1.2
+        roof_width = diam * scene.RoofWidth
+        windshield_angle = scene.WindshieldAngle
 
         # load wheel
         bpy.ops.wm.append(filename="base_tire", directory="D:/Projects/art/3d/vehicles/wheel_model.blend\\Object\\")
@@ -202,10 +228,11 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(dist_from_center_x + width / 2. - 1.0, 0, 0))
+
         bpy.ops.object.vertex_group_set_active(group='roof_side_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(dist_from_center_x - 1.0, 0, 0))
+        bpy.ops.transform.translate(value=(roof_width - 1.0, 0, 0))
 
         bpy.ops.object.vertex_group_set_active(group='hip_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
@@ -217,6 +244,11 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(0, 0, quarter_diam))
 
+        bpy.ops.object.vertex_group_set_active(group='midline_vertices')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.translate(value=(0, 0, quarter_diam + half_diam - 0.5))
+
         bpy.ops.object.vertex_group_set_active(group='roof_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
@@ -227,6 +259,10 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(0, 0, shoulder_height - 1.0))
 
+        bpy.ops.object.vertex_group_set_active(group='centerline_vertices')
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.transform.translate(value=(shoulder_width - 1.0, 0, 0))
+ 
         windshield_rads = math.radians(windshield_angle)
         base_y = (shoulder_height - half_diam) / math.tan(windshield_rads)
         print(math.tan(windshield_rads), base_y)
@@ -247,7 +283,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(0, 0 - dist_from_center_y + top_y + 0.75, 0))
-
+        bpy.ops.mesh.select_all(action='DESELECT')
 
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
