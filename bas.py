@@ -125,6 +125,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         top_line_width = diam * 1.2
         roof_width = diam * scene.RoofWidth
         windshield_angle = scene.WindshieldAngle
+        shoulder_line_height = diam * 1.05
 
         # load wheel
         bpy.ops.wm.append(filename="base_tire", directory="D:/Projects/art/3d/vehicles/wheel_model.blend\\Object\\")
@@ -221,6 +222,17 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(0, -0.5 + half_diam + diam * 0.05, 0))
 
+        offset = math.sin(math.radians(45)) * half_diam * 1.2
+        print (offset)
+        bpy.ops.object.vertex_group_set_active(group= 'front_well_detail')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.translate(value=(0, .25 - offset, offset + half_diam - .625))        
+        bpy.ops.object.vertex_group_set_active(group='rear_well_detail')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.translate(value=(0, -0.25 + offset, offset + half_diam - .625))
+
         bpy.ops.object.vertex_group_set_active(group='side_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
@@ -234,7 +246,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_set_active(group='shoulder_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, diam * 1.05 - .75))
+        bpy.ops.transform.translate(value=(0, 0, shoulder_line_height - .75))
 
         bpy.ops.object.vertex_group_set_active(group='skirt_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
@@ -244,7 +256,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_set_active(group='mid_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, quarter_diam + half_diam - 0.5))
+        bpy.ops.transform.translate(value=(0, 0, half_diam - 0.5))
 
         bpy.ops.object.vertex_group_set_active(group='roof_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
