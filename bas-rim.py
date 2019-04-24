@@ -51,6 +51,11 @@ bpy.types.Scene.ET = IntProperty(
     name = "Insertion Depth (ET)",
     description = "Insertion depth",
     default = 38)
+
+bpy.types.Scene.CenterDiameter = FloatProperty(
+    name = "Center Diameter",
+    description = "Size of center hub",
+    default = 15)
     
 # Set up panel layout
 class ToolPropsPanel(bpy.types.Panel):
@@ -67,6 +72,7 @@ class ToolPropsPanel(bpy.types.Panel):
         self.layout.prop(scene, 'NumSpokes')
         self.layout.prop(scene, 'SpokeWidth')
         self.layout.prop(scene, 'SpokeTaper')
+        self.layout.prop(scene, 'CenterDiameter')
         self.layout.prop(scene, 'ET')
 
         self.layout.operator('execute.makerim')
@@ -90,32 +96,23 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         num_spokes = scene.NumSpokes
         wheel_diam = scene.WheelDiameter * .0254
         wheel_width_half = scene.WheelWidth * .0254 / 2.0
+        center_diam = scene.CenterDiameter / 100.0
+        mid_diam = ( (wheel_diam - center_diam) / 2.0 ) + center_diam
+
+        print (wheel_diam, center_diam, mid_diam)
         et = scene.ET * .001 + .01
 
-        #---------------- ??
-        #wheel_mesh = bpy.context.object.data
-        #bm = bmesh.from_edit_mesh(wheel_mesh)
-        
-        #bm.update_edit_mesh(wheel_mesh, True)
-        #---------------- ??
         one_deg = math.pi / 180.0
         rotation_angle = 2 * math.pi / num_spokes
         spoke_width = one_deg * scene.SpokeWidth
         space_width = (rotation_angle - spoke_width) / 2
         taper = scene.SpokeTaper
 
-        #inner_spoke_width = 2 * math.pi * .05 * scene.SpokeWidth / 360
-        #outer_spoke_width = 2 * math.pi * wheel_diam / 2.0 * scene. / 360
         outer_spoke_width = (.05 * spoke_width) / (wheel_diam / 2.0)
         outer_space_width = (rotation_angle - outer_spoke_width) / 2.0
-
+        
         spoke_diff = outer_spoke_width - spoke_width / 2.0
-        print ("-=-=-=-")
-        print (wheel_diam)
-        print (spoke_width, outer_spoke_width)
-        print (space_width, outer_space_width)
-
-        #bpy.context.object.rotation_euler[2] = 2 * math.pi / num_spokes
+        space_diff = outer_space_width - space_width / 2.0
 
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['RimRotateEmpty'].select = True
@@ -179,11 +176,36 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.transform.rotate(value=-spoke_diff/2.0, axis=(0, 0, 1.0))
         bpy.ops.mesh.select_all(action='DESELECT')
 
+        bpy.ops.object.vertex_group_set_active(group='inner_inner_mid')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.rotate(value=space_diff/4, axis=(0, 0, 1.0))
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        bpy.ops.object.vertex_group_set_active(group='inner_outer_mid')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.rotate(value=-space_diff/4, axis=(0, 0, 1.0))
+        bpy.ops.mesh.select_all(action='DESELECT')
+
         bpy.ops.object.vertex_group_set_active(group='wheel_circumference')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.resize(value=(wheel_diam * 2.0, wheel_diam * 2.0, 1.0), constraint_axis=(True, True, False))
         bpy.ops.mesh.select_all(action='DESELECT')
+
+        bpy.ops.object.vertex_group_set_active(group='inner_circumference')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.resize(value=(center_diam * 10, center_diam * 10, 1.0), constraint_axis=(True, True, False))
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        # bpy.ops.object.vertex_group_set_active(group='spoke_midpoint')
+        # bpy.ops.mesh.select_all(action='DESELECT')
+        # bpy.ops.object.vertex_group_select()
+        # bpy.ops.transform.resize(value=(mid_diam * 10. / 15., mid_diam * 10. / 15., 1.0), constraint_axis=(True, True, False))
+        # bpy.ops.mesh.select_all(action='DESELECT')
+
 
         bpy.ops.object.vertex_group_set_active(group='outer_face')
         bpy.ops.mesh.select_all(action='DESELECT')
