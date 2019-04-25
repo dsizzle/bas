@@ -94,10 +94,10 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.wm.append(filename="base_rim", directory="D:/Projects/art/3d/vehicles/rim_model.blend\\Object\\")
         
         num_spokes = scene.NumSpokes
-        wheel_diam = scene.WheelDiameter * .0254
+        wheel_diam = ( scene.WheelDiameter / .5 ) * .0254 
         wheel_width_half = scene.WheelWidth * .0254 / 2.0
-        center_diam = scene.CenterDiameter / 100.0
-        mid_diam = ( (wheel_diam - center_diam) / 2.0 ) + center_diam
+        center_diam = ( scene.CenterDiameter / 100. ) / .1 
+        mid_diam = ( (wheel_diam + center_diam) / 2.0 ) * .85
 
         print (wheel_diam, center_diam, mid_diam)
         et = scene.ET * .001 + .01
@@ -191,21 +191,20 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_set_active(group='wheel_circumference')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.resize(value=(wheel_diam * 2.0, wheel_diam * 2.0, 1.0), constraint_axis=(True, True, False))
+        bpy.ops.transform.resize(value=(wheel_diam, wheel_diam, 1.0), constraint_axis=(True, True, False))
         bpy.ops.mesh.select_all(action='DESELECT')
 
         bpy.ops.object.vertex_group_set_active(group='inner_circumference')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.resize(value=(center_diam * 10, center_diam * 10, 1.0), constraint_axis=(True, True, False))
+        bpy.ops.transform.resize(value=(center_diam, center_diam, 1.0), constraint_axis=(True, True, False))
         bpy.ops.mesh.select_all(action='DESELECT')
 
-        # bpy.ops.object.vertex_group_set_active(group='spoke_midpoint')
-        # bpy.ops.mesh.select_all(action='DESELECT')
-        # bpy.ops.object.vertex_group_select()
-        # bpy.ops.transform.resize(value=(mid_diam * 10. / 15., mid_diam * 10. / 15., 1.0), constraint_axis=(True, True, False))
-        # bpy.ops.mesh.select_all(action='DESELECT')
-
+        bpy.ops.object.vertex_group_set_active(group='spoke_midpoint')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.resize(value=(mid_diam, mid_diam, 1.0), constraint_axis=(True, True, False))
+        bpy.ops.mesh.select_all(action='DESELECT')
 
         bpy.ops.object.vertex_group_set_active(group='outer_face')
         bpy.ops.mesh.select_all(action='DESELECT')
