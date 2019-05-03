@@ -30,7 +30,7 @@ bpy.types.Scene.NumSpokes = IntProperty(
 bpy.types.Scene.SpokeWidth = FloatProperty(
     name = "Spoke Width",
     description = "Width of spoke",
-    default = 20.0)
+    default = 50.0)
 
 bpy.types.Scene.WheelDiameter = FloatProperty(
     name = "Wheel Diameter", 
@@ -45,7 +45,7 @@ bpy.types.Scene.WheelWidth = FloatProperty(
 bpy.types.Scene.SpokeTaper = FloatProperty(
     name = "Spoke Taper",
     description = "Taper of spoke from inner to outer",
-    default = 0)
+    default = 0, min=-1.0, max=1.0)
 
 bpy.types.Scene.ET = IntProperty(
     name = "Insertion Depth (ET)",
@@ -57,6 +57,11 @@ bpy.types.Scene.CenterDiameter = FloatProperty(
     description = "Size of center hub",
     default = 15)
     
+bpy.types.Scene.SpokeCurveDepth = FloatProperty(
+    name = "Spoke Curve Depth",
+    description = "How much the spokes bulge outward or inward",
+    default = 0)
+
 # Set up panel layout
 class ToolPropsPanel(bpy.types.Panel):
 
@@ -72,6 +77,7 @@ class ToolPropsPanel(bpy.types.Panel):
         self.layout.prop(scene, 'NumSpokes')
         self.layout.prop(scene, 'SpokeWidth')
         self.layout.prop(scene, 'SpokeTaper')
+        self.layout.prop(scene, 'SpokeCurveDepth')
         self.layout.prop(scene, 'CenterDiameter')
         self.layout.prop(scene, 'ET')
 
@@ -89,9 +95,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         #bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
         # load wheel
-        #++bpy.ops.wm.append(filename="RimRotateEmpty", directory="D:/Projects/art/3d/vehicles/rim_model.blend\\Object\\")
-        
-        bpy.ops.wm.append(filename="base_rim", directory="D:/Projects/art/3d/vehicles/rim_model.blend\\Object\\")
+        bpy.ops.wm.append(filename="base_rim", directory="D:/Projects/art/3d/vehicles/rim_model2.blend\\Object\\")
         
         num_spokes = scene.NumSpokes
         wheel_diam = ( scene.WheelDiameter / .5 ) * .0254 
@@ -99,20 +103,41 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         center_diam = ( scene.CenterDiameter / 100. ) / .1 
         mid_diam = ( (wheel_diam + center_diam) / 2.0 ) * .85
 
-        print (wheel_diam, center_diam, mid_diam)
         et = scene.ET * .001 + .01
 
         one_deg = math.pi / 180.0
         rotation_angle = 2 * math.pi / num_spokes
         spoke_width = one_deg * scene.SpokeWidth
-        space_width = (rotation_angle - spoke_width) / 2
+        
         taper = scene.SpokeTaper
 
-        outer_spoke_width = (.05 * spoke_width) / (wheel_diam / 2.0)
-        outer_space_width = (rotation_angle - outer_spoke_width) / 2.0
+        inner_taper = -.01
+        outer_taper = .01
+
+        if taper < 0:
+            inner_taper = taper
+        elif taper > 0:
+            outer_taper = taper
+            
+        spoke_width_taper = spoke_width / (1.01 + taper)
         
-        spoke_diff = outer_spoke_width - spoke_width / 2.0
+        outer_spoke_width = (.05 * spoke_width) / (wheel_diam / 4.0)
+        outer_spoke_width_taper = outer_spoke_width / (1.01 - taper)
+        
+        space_width = (rotation_angle - spoke_width_taper) / 2.
+
+        print (spoke_width, spoke_width_taper)
+        print (outer_spoke_width, outer_spoke_width_taper)
+
+        mid_spoke_width = (.05 * spoke_width) / (mid_diam / 4.0)
+        outer_space_width = (rotation_angle - outer_spoke_width_taper) / 2.0
+        
+        print (spoke_width, mid_spoke_width, outer_spoke_width)
+
+        spoke_diff = outer_spoke_width_taper - spoke_width_taper / 2.0
         space_diff = outer_space_width - space_width / 2.0
+
+        spoke_curve_depth = scene.SpokeCurveDepth / 100
 
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['RimRotateEmpty'].select = True
@@ -130,26 +155,38 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_set_active(group='outer_edge')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.rotate(value=-(rotation_angle - (6 * one_deg)), axis=(0, 0, 1.0))
+        bpy.ops.transform.rotate(value=-(rotation_angle - (7 * one_deg)), axis=(0, 0, 1.0))
         bpy.ops.mesh.select_all(action='DESELECT')
 
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
         bpy.ops.object.vertex_group_set_active(group='outer_mid')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.rotate(value=-(rotation_angle - (outer_space_width / 2.0) - (5 * one_deg)), axis=(0, 0, 1.0))
+        bpy.ops.transform.rotate(value=-(rotation_angle - (outer_space_width / 2.0) - (6 * one_deg)), axis=(0, 0, 1.0))
         bpy.ops.mesh.select_all(action='DESELECT')
         
         bpy.ops.object.vertex_group_set_active(group='spoke_outer_edge')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.rotate(value=-(rotation_angle - outer_space_width - (4 * one_deg)), axis=(0, 0, 1.0))
+        bpy.ops.transform.rotate(value=-(rotation_angle - outer_space_width - (5 * one_deg)), axis=(0, 0, 1.0))
         bpy.ops.mesh.select_all(action='DESELECT')
 
         bpy.ops.object.vertex_group_set_active(group='spoke_center')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.rotate(value=-((rotation_angle / 2.0) - (3 * one_deg)), axis=(0, 0, 1.0))
+        bpy.ops.transform.rotate(value=-((rotation_angle / 2.0) - (3.5 * one_deg)), axis=(0, 0, 1.0))
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        bpy.ops.object.vertex_group_set_active(group='spoke_center_outer')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.rotate(value=-((mid_spoke_width / 2.0) - (3 * one_deg)), axis=(0, 0, 1.0))
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        bpy.ops.object.vertex_group_set_active(group='spoke_center_inner')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.rotate(value=((mid_spoke_width / 2.0) - (3 * one_deg)), axis=(0, 0, 1.0))
         bpy.ops.mesh.select_all(action='DESELECT')
 
         bpy.ops.object.vertex_group_set_active(group='spoke_inner_edge')
@@ -204,7 +241,22 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.resize(value=(mid_diam, mid_diam, 1.0), constraint_axis=(True, True, False))
+        bpy.ops.transform.translate(value=(0, 0, spoke_curve_depth))
         bpy.ops.mesh.select_all(action='DESELECT')
+
+        bpy.ops.object.vertex_group_set_active(group='spoke_midpoint_inner')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.rotate(value=-spoke_diff/8.5, axis=(0, 0, 1.0))
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        bpy.ops.object.vertex_group_set_active(group='spoke_midpoint_outer')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.rotate(value=spoke_diff/8.5, axis=(0, 0, 1.0))
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        print(wheel_width_half - .25)
 
         bpy.ops.object.vertex_group_set_active(group='outer_face')
         bpy.ops.mesh.select_all(action='DESELECT')
