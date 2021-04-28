@@ -17,13 +17,13 @@ from bpy.props import *
 #
 bpy.types.Scene.TireWidth = FloatProperty(
     name = "Tire Width", 
-    description = "Width of tire",
+    description = "Width of tire (mm)",
     default = 215)
 
-bpy.types.Scene.TireDiameter = FloatProperty(
-    name = "Tire Outside Diameter", 
-    description = "Diameter of tire",
-    default = 24)
+bpy.types.Scene.TireSidewall = FloatProperty(
+    name = "Tire Sidewall", 
+    description = "Sidewall width (in)",
+    default = 30)
  
 bpy.types.Scene.WheelDiameter = FloatProperty(
     name = "Wheel Size", 
@@ -49,6 +49,11 @@ bpy.types.Scene.VehicleWidth = FloatProperty(
     name = "Vehicle Width",
     description = "Width of vehicle based on wheel size",
     default = 1.5)
+
+bpy.types.Scene.WaistWidth = FloatProperty(
+    name = "Waist Width",
+    description = "Width of vehicle at waistline based on wheel size",
+    default = 1.25)
 
 bpy.types.Scene.RoofWidth = FloatProperty(
     name = "Roof Width",
@@ -82,9 +87,136 @@ bpy.types.Scene.AllObjects = BoolProperty(
     name="Affect All Objects",
     default = True)
 
-    
+class WM_OT_HatchbackType(bpy.types.Operator):
+    bl_label = "Hatchback"
+    bl_idname = "wm.hatchback_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 215
+        scene.TireSidewall = 50
+        scene.WheelDiameter = 17
+
+        scene.Wheelbase = 3.25
+        scene.FrontOverhang = 1
+        scene.RearOverhang = 0.5
+        scene.VehicleHeight = 2.33
+        scene.WaistLine = 1.66
+        scene.WindshieldAngle = 45
+        scene.VehicleWidth = 1.45
+        scene.WaistWidth = 1.17
+        scene.RoofWidth = 0.8
+
+        return {'FINISHED'}
+
+class WM_OT_MidsizeSedanType(bpy.types.Operator):
+    bl_label = "Midsize Sedan"
+    bl_idname = "wm.midsize_sedan_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 225
+        scene.TireSidewall = 50
+        scene.WheelDiameter = 17
+
+        scene.Wheelbase = 3.5
+        scene.FrontOverhang = 0.75
+        scene.RearOverhang = 1
+        scene.VehicleHeight = 2.25
+        scene.WaistLine = 1.5
+        scene.WindshieldAngle = 40
+        scene.VehicleWidth = 1.5
+        scene.WaistWidth = 1.17
+        scene.RoofWidth = 0.8
+
+        return {'FINISHED'}
+
+class WM_OT_LuxurySedanType(bpy.types.Operator):
+    bl_label = "Luxury Sedan"
+    bl_idname = "wm.luxury_sedan_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 245
+        scene.TireSidewall = 50
+        scene.WheelDiameter = 19
+
+        scene.Wheelbase = 3.75
+        scene.FrontOverhang = 0.75
+        scene.RearOverhang = 1
+        scene.VehicleHeight = 2.25
+        scene.WaistLine = 1.5
+        scene.WindshieldAngle = 35
+        scene.VehicleWidth = 1.5
+        scene.WaistWidth = 1.17
+        scene.RoofWidth = 0.8
+
+        return {'FINISHED'}
+
+class WM_OT_SportsGTType(bpy.types.Operator):
+    bl_label = "Sports GT"
+    bl_idname = "wm.sports_gt_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 235
+        scene.TireSidewall = 50
+        scene.WheelDiameter = 18
+
+        scene.Wheelbase = 2.8
+        scene.FrontOverhang = 0.5
+        scene.RearOverhang = 0.5
+        scene.VehicleHeight = 1.8
+        scene.WaistLine = 1.33
+        scene.WindshieldAngle = 30
+        scene.VehicleWidth = 1.5
+        scene.WaistWidth = 1.2
+        scene.RoofWidth = 0.8
+
+        return {'FINISHED'}
+
+class WM_OT_SportsMidEngineType(bpy.types.Operator):
+    bl_label = "Sports Mid-engine"
+    bl_idname = "wm.sports_mid_engine_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 245
+        scene.TireSidewall = 35
+        scene.WheelDiameter = 19
+
+        scene.Wheelbase = 2.75
+        scene.FrontOverhang = 0.75
+        scene.RearOverhang = 0.5
+        scene.VehicleHeight = 1.75
+        scene.WaistLine = 1.33
+        scene.WindshieldAngle = 25
+        scene.VehicleWidth = 1.55
+        scene.WaistWidth = 1.25
+        scene.RoofWidth = 0.75
+
+        return {'FINISHED'}
+
+class OBJECT_MT_PresetMenu(bpy.types.Menu):
+    bl_label = "Preset"
+    bl_idname = "mt.preset_menu"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator(WM_OT_HatchbackType.bl_idname, text=WM_OT_HatchbackType.bl_label)
+        layout.operator(WM_OT_MidsizeSedanType.bl_idname, text=WM_OT_MidsizeSedanType.bl_label)
+        layout.operator(WM_OT_LuxurySedanType.bl_idname, text=WM_OT_LuxurySedanType.bl_label)
+        layout.operator(WM_OT_SportsGTType.bl_idname, text=WM_OT_SportsGTType.bl_label)
+        layout.operator(WM_OT_SportsMidEngineType.bl_idname, text=WM_OT_SportsMidEngineType.bl_label)
+
 # Set up panel layout
-class ToolPropsPanel(bpy.types.Panel):
+class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
 
     bl_label = "Blender Auto Studio"
     bl_space_type = "VIEW_3D"
@@ -92,25 +224,29 @@ class ToolPropsPanel(bpy.types.Panel):
     
     def draw(self, context):
         scene = context.scene
-       
-        self.layout.prop(scene, 'TireWidth')
-        self.layout.prop(scene, 'TireDiameter')
-        self.layout.prop(scene, 'WheelDiameter')
-        self.layout.separator()
+        layout = self.layout
 
-        self.layout.prop(scene, 'Wheelbase')
-        self.layout.prop(scene, 'FrontOverhang')
-        self.layout.prop(scene, 'RearOverhang')
-        self.layout.prop(scene, 'VehicleHeight')
-        self.layout.prop(scene, 'WaistLine')
-        self.layout.prop(scene, 'VehicleWidth')
-        self.layout.prop(scene, 'RoofWidth')
+        layout.prop(scene, 'TireWidth')
+        layout.prop(scene, 'TireSidewall')
+        layout.prop(scene, 'WheelDiameter')
+        layout.separator()
+
+        layout.menu(OBJECT_MT_PresetMenu.bl_idname, text=OBJECT_MT_PresetMenu.bl_label)
         
-        self.layout.prop(scene, 'WindshieldAngle')
+        layout.prop(scene, 'Wheelbase')
+        layout.prop(scene, 'FrontOverhang')
+        layout.prop(scene, 'RearOverhang')
+        layout.prop(scene, 'VehicleHeight')
+        layout.prop(scene, 'WaistLine')
+        layout.prop(scene, 'VehicleWidth')
+        layout.prop(scene, 'WaistWidth')
+        layout.prop(scene, 'RoofWidth')
+        
+        layout.prop(scene, 'WindshieldAngle')
 
-        self.layout.separator()
-        self.layout.prop(scene, 'AllObjects')
-        self.layout.operator('execute.makecar')
+        layout.separator()
+        #layout.prop(scene, 'AllObjects')
+        layout.operator('execute.makecar')
     
 
 class OBJECT_OT_ExecuteButton(bpy.types.Operator):
@@ -121,7 +257,9 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         scene = context.scene
         override = context.copy() # dictionary of context
 
-        diam = scene.TireDiameter * .0254
+        #diam = scene.TireDiameter * .0254
+        diam = (scene.TireWidth * scene.TireSidewall / 2540. * 2 ) + scene.WheelDiameter
+        diam = diam * .0254
         half_diam = diam / 2.0
         quarter_diam = diam / 4.0
         wheel_diam = scene.WheelDiameter * .0254
@@ -134,15 +272,21 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         overhang_diff = rear_overhang - front_overhang
         height = diam * scene.VehicleHeight
         top_line_height = diam * scene.WaistLine
-        top_line_width = diam * 1.2
+        top_line_width = diam * scene.WaistWidth
         roof_width = diam * scene.RoofWidth
         windshield_angle = scene.WindshieldAngle
         shoulder_line_height = diam * 1.05
 
+        # save selection first?
+        bpy.ops.object.select_all(action='DESELECT')
         # load wheel
         bpy.ops.wm.append(filename="base_tire", directory="D:/Projects/art/3d/vehicles/wheel_model.blend\\Object\\")
+        tire_obj = bpy.context.selected_objects[0]
+
+        bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.wm.append(filename="base_vehicle", directory="D:/Projects/art/3d/vehicles/car_model.blend\\Object\\")
-        
+        body_obj = bpy.context.selected_objects[0]
+
         #---------------- ??
         #wheel_mesh = bpy.context.object.data
         #bm = bmesh.from_edit_mesh(wheel_mesh)
@@ -151,8 +295,8 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         #---------------- ??
         
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.data.objects['base_tire'].select_set(True)
-        bpy.context.view_layer.objects.active = bpy.data.objects['base_tire']
+        tire_obj.select_set(True)
+        bpy.context.view_layer.objects.active = tire_obj
         bpy.ops.view3d.snap_cursor_to_selected()
         bpy.context.scene.tool_settings.transform_pivot_point = 'CURSOR'
         #bpy.context.space_data.pivot_point = 'CURSOR'
@@ -196,8 +340,8 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.context.object.name="vehicle_bounding_box"
 
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.data.objects['base_vehicle'].select_set(True)
-        bpy.context.view_layer.objects.active = bpy.data.objects['base_vehicle']
+        body_obj.select_set(True)
+        bpy.context.view_layer.objects.active = body_obj 
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
         bpy.ops.object.vertex_group_set_active(group='front_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
@@ -234,10 +378,6 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.translate(value=(0, -0.5 + half_diam + diam * 0.05, 0))
-        # bpy.ops.object.vertex_group_set_active(group='c_pillar_midline_vertices')
-        # bpy.ops.mesh.select_all(action='DESELECT')
-        # bpy.ops.object.vertex_group_select()
-        # bpy.ops.transform.translate(value=(0, dist_from_center_y - 1.0, 0))
 
         offset = math.sin(math.radians(45)) * half_diam * 1.2
         print (offset)
@@ -254,7 +394,6 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_set_active(group='side_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        #bpy.ops.transform.translate(value=(dist_from_center_x + width / 2. - 1.0, 0, 0))
         bpy.ops.transform.translate(value=(shoulder_x - 1.0, 0, 0))
 
         bpy.ops.object.vertex_group_set_active(group='roof_side_vertices')
@@ -338,7 +477,13 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         return{'FINISHED'}
 
 classes = (
-    ToolPropsPanel,
+    WM_OT_HatchbackType,
+    WM_OT_MidsizeSedanType,
+    WM_OT_LuxurySedanType,
+    WM_OT_SportsGTType,
+    WM_OT_SportsMidEngineType,
+    OBJECT_MT_PresetMenu,
+    OBJECT_PT_ToolPropsPanel,
     OBJECT_OT_ExecuteButton
 )
 
