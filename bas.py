@@ -10,6 +10,7 @@ bl_info = { "name": "Blender Auto Studio",
             "author": "Dale Cieslak"}
 
 import bpy
+import bmesh
 import math
 from bpy.props import *
 
@@ -23,69 +24,79 @@ bpy.types.Scene.TireWidth = FloatProperty(
 bpy.types.Scene.TireSidewall = FloatProperty(
     name = "Tire Sidewall", 
     description = "Sidewall width (in)",
-    default = 30)
+    default = 50)
  
 bpy.types.Scene.WheelDiameter = FloatProperty(
     name = "Wheel Size", 
     description = "Diameter of wheel",
-    default = 19)
+    default = 17)
  
 bpy.types.Scene.Wheelbase = FloatProperty(
     name = "Wheelbase",
     description = "Number of wheels between wheels",
-    default = 3.0)
+    default = 3.25)
 
 bpy.types.Scene.VehicleHeight = FloatProperty(
     name = "Vehicle Height",
     description = "Height of vehicle based on wheel size",
-    default = 2.25)
+    default = 2.33)
 
+# rename to belt line?
 bpy.types.Scene.WaistLine = FloatProperty(
     name = "Waist Line",
     description = "Waist Line of vehicle based on wheel size",
-    default = 1.5)
+    default = 1.66)
 
 bpy.types.Scene.VehicleWidth = FloatProperty(
     name = "Vehicle Width",
     description = "Width of vehicle based on wheel size",
-    default = 1.5)
+    default = 1.45)
 
+# rename to belt line?
 bpy.types.Scene.WaistWidth = FloatProperty(
     name = "Waist Width",
     description = "Width of vehicle at waistline based on wheel size",
-    default = 1.25)
+    default = 1.17)
 
 bpy.types.Scene.RoofWidth = FloatProperty(
     name = "Roof Width",
     description = "Width of roof based on wheel size",
-    default = 1.0)
+    default = 0.8)
 
 bpy.types.Scene.FrontOverhang = FloatProperty(
     name = "Front Overhang",
     description = "Number of wheels in front of front wheel",
-    default = 0.5,
+    default = 1.0,
     min = 0.25, max = 2.5)
 
 bpy.types.Scene.RearOverhang = FloatProperty(
     name = "Rear Overhang",
     description = "Number of wheels to rear of rear wheel",
-    default = 1.0,
+    default = 0.5,
     min = 0.25, max = 2.5)
 
 bpy.types.Scene.WindshieldAngle = FloatProperty(
     name = "Windshield Angle",
     description = "Angle of windshield",
-    default = 40.0,
+    default = 45.0,
     min = 20.0, max = 89.0)
-    
-bpy.types.Scene.MinSubd = IntProperty(
-    name = "Min. SubD level",
-    description = "minimum subd level for farthest object",
-    default = 0)
-    
-bpy.types.Scene.AllObjects = BoolProperty(
-    name="Affect All Objects",
-    default = True)
+
+bpy.types.Scene.WedgeAngle = FloatProperty(
+    name = "Wedge Angle",
+    description = "Angle of lines from front to back",
+    default = 5.0,
+    min = 0, max = 10)
+
+bpy.types.Scene.CabPlacement = EnumProperty(
+    name="Cab Placement",
+    description = "Where the cab sits",
+    default='FWD',
+    items=[
+        ('FWD', "Front-wheel drive", ""),
+        ('RWD', "Rear-wheel drive", ""),
+        ('MID', "Mid-Engine", ""), 
+    ]) 
+
 
 class WM_OT_HatchbackType(bpy.types.Operator):
     bl_label = "Hatchback"
@@ -107,6 +118,7 @@ class WM_OT_HatchbackType(bpy.types.Operator):
         scene.VehicleWidth = 1.45
         scene.WaistWidth = 1.17
         scene.RoofWidth = 0.8
+        scene.CabPlacement = 'FWD'
 
         return {'FINISHED'}
 
@@ -130,6 +142,7 @@ class WM_OT_MidsizeSedanType(bpy.types.Operator):
         scene.VehicleWidth = 1.5
         scene.WaistWidth = 1.17
         scene.RoofWidth = 0.8
+        scene.CabPlacement = 'FWD'
 
         return {'FINISHED'}
 
@@ -153,6 +166,7 @@ class WM_OT_LuxurySedanType(bpy.types.Operator):
         scene.VehicleWidth = 1.5
         scene.WaistWidth = 1.17
         scene.RoofWidth = 0.8
+        scene.CabPlacement = 'RWD'
 
         return {'FINISHED'}
 
@@ -176,6 +190,7 @@ class WM_OT_SportsGTType(bpy.types.Operator):
         scene.VehicleWidth = 1.5
         scene.WaistWidth = 1.2
         scene.RoofWidth = 0.8
+        scene.CabPlacement = 'RWD'
 
         return {'FINISHED'}
 
@@ -199,6 +214,7 @@ class WM_OT_SportsMidEngineType(bpy.types.Operator):
         scene.VehicleWidth = 1.55
         scene.WaistWidth = 1.25
         scene.RoofWidth = 0.75
+        scene.CabPlacement = 'MID'
 
         return {'FINISHED'}
 
@@ -210,6 +226,7 @@ class OBJECT_MT_PresetMenu(bpy.types.Menu):
         layout = self.layout
 
         layout.operator(WM_OT_HatchbackType.bl_idname, text=WM_OT_HatchbackType.bl_label)
+        #layout.operator(WM_OT_CompactSedanType.bl_idname, text=WM_OT_CompactSedanType.bl_label)
         layout.operator(WM_OT_MidsizeSedanType.bl_idname, text=WM_OT_MidsizeSedanType.bl_label)
         layout.operator(WM_OT_LuxurySedanType.bl_idname, text=WM_OT_LuxurySedanType.bl_label)
         layout.operator(WM_OT_SportsGTType.bl_idname, text=WM_OT_SportsGTType.bl_label)
@@ -241,8 +258,8 @@ class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
         layout.prop(scene, 'VehicleWidth')
         layout.prop(scene, 'WaistWidth')
         layout.prop(scene, 'RoofWidth')
-        
         layout.prop(scene, 'WindshieldAngle')
+        layout.prop(scene, 'CabPlacement')
 
         layout.separator()
         #layout.prop(scene, 'AllObjects')
@@ -266,6 +283,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         sidewall_diam = ((diam / 2.) + wheel_diam) / 2.0
         width = scene.TireWidth / 1000.0
         dist_from_center_y = (diam * scene.Wheelbase) / 2. + (diam / 2.)
+        dist_from_center_y_in = (diam * scene.Wheelbase) / 2.
         dist_from_center_x = (diam * scene.VehicleWidth) - (width / 2.)
         front_overhang = (diam * scene.FrontOverhang) 
         rear_overhang = (diam * scene.RearOverhang) 
@@ -279,6 +297,13 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
 
         # save selection first?
         bpy.ops.object.select_all(action='DESELECT')
+        
+        vehicle_collection = bpy.data.collections.new("vehicle")
+        bpy.context.scene.collection.children.link(vehicle_collection)
+        vehicle_root=bpy.context.view_layer.layer_collection.children[vehicle_collection.name]
+
+        bpy.context.view_layer.active_layer_collection=vehicle_root
+
         # load wheel
         bpy.ops.wm.append(filename="base_tire", directory="D:/Projects/art/3d/vehicles/wheel_model.blend\\Object\\")
         tire_obj = bpy.context.selected_objects[0]
@@ -343,93 +368,173 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         body_obj.select_set(True)
         bpy.context.view_layer.objects.active = body_obj 
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+        
+        vehicle_bmesh = bmesh.from_edit_mesh(body_obj.data)
+        
         bpy.ops.object.vertex_group_set_active(group='front_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0-(dist_from_center_y + front_overhang + half_diam - 2.0), 0))
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = 0-(dist_from_center_y + front_overhang + half_diam)
         
         bpy.ops.object.vertex_group_set_active(group='front_wheel_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0-(dist_from_center_y - 1.0), 0))
-        bpy.ops.object.vertex_group_set_active(group='front_wheel_front_well_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0.5 - half_diam - diam * 0.05, 0))        
-        bpy.ops.object.vertex_group_set_active(group='front_wheel_rear_well_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, -0.5 + half_diam + diam * 0.05, 0))
-        
-        bpy.ops.object.vertex_group_set_active(group='rear_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, dist_from_center_y + rear_overhang + half_diam - 2.0, 0))
 
+        y_max = -1000
+        y_min = 0
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                if v.co.y > y_max:
+                    y_max = v.co.y
+                if v.co.y < y_min:
+                    y_min = v.co.y
+
+        y_mid = (y_max+y_min)/2.+dist_from_center_y
+
+        print(y_max, y_min)
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y -= y_mid
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='front_wheel_front_well_vertices')
+        bpy.ops.object.vertex_group_select()
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = 0-dist_from_center_y-half_diam-(diam*.05)
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='front_wheel_rear_well_vertices')
+        bpy.ops.object.vertex_group_select()
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = 0-dist_from_center_y+half_diam+(diam*.05)
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='rear_vertices')
+        bpy.ops.object.vertex_group_select()
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = (dist_from_center_y + rear_overhang + half_diam)
+
+        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_set_active(group='rear_wheel_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, dist_from_center_y - 1.0, 0))
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y += y_mid
+
+        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_set_active(group='rear_wheel_front_well_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0.5 - half_diam - diam * 0.05, 0))        
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = dist_from_center_y-half_diam-(diam*.05)
+
+        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_set_active(group='rear_wheel_rear_well_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, -0.5 + half_diam + diam * 0.05, 0))
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = dist_from_center_y+half_diam+(diam*.05)
 
         offset = math.sin(math.radians(45)) * half_diam * 1.2
         print (offset)
+        
+        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_set_active(group= 'front_well_detail')
-        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, .25 - offset, offset + half_diam - .625))        
         bpy.ops.object.vertex_group_set_active(group='rear_well_detail')
-        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, -0.25 + offset, offset + half_diam - .625))
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.z = offset+half_diam
 
         shoulder_x = scene.VehicleWidth * diam
         bpy.ops.object.vertex_group_set_active(group='side_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(shoulder_x - 1.0, 0, 0))
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.x = shoulder_x
 
         bpy.ops.object.vertex_group_set_active(group='roof_side_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(-(scene.VehicleWidth - roof_width)*diam, 0, 0))
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.x = roof_width*diam
 
         bpy.ops.object.vertex_group_set_active(group='shoulder_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, shoulder_line_height - .75))
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.z = shoulder_line_height
 
         bpy.ops.object.vertex_group_set_active(group='skirt_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, quarter_diam))
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.z = quarter_diam
 
         bpy.ops.object.vertex_group_set_active(group='mid_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, half_diam - 0.5))
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.z = half_diam
 
         bpy.ops.object.vertex_group_set_active(group='roof_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, height - 2.0))
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.z = height
 
         bpy.ops.object.vertex_group_set_active(group='top_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0, top_line_height - 1.0))
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.z = top_line_height
 
         bpy.ops.object.vertex_group_set_active(group='centerline_vertices')
         bpy.ops.object.vertex_group_deselect()
-        bpy.ops.transform.translate(value=(top_line_width - shoulder_x, 0, 0))
- 
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.x = top_line_width
+
+        hip_line_height = (shoulder_line_height+top_line_height) / 2.
+
+        bpy.ops.object.vertex_group_set_active(group='hip_line_vertices')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.z = hip_line_height
+
         windshield_rads = math.radians(windshield_angle)
         base_y = (top_line_height - half_diam) / math.tan(windshield_rads)
         top_y = (height - half_diam) / math.tan(windshield_rads)
@@ -437,12 +542,18 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_set_active(group='windshield_base_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0 - dist_from_center_y + base_y + 0.5, 0))
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = 0-dist_from_center_y+base_y
 
         bpy.ops.object.vertex_group_set_active(group='windshield_top_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0 - dist_from_center_y + top_y + 0.5, 0))
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = 0-dist_from_center_y+top_y
 
         front_of_rear_wheel_well = dist_from_center_y - half_diam - (diam * 0.05)
         top_roof_line = 0 - dist_from_center_y + top_y
@@ -452,8 +563,10 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_set_active(group='front_back_midline_vertices')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, 0 + mid_line, 0))
-        bpy.ops.mesh.select_all(action='DESELECT')
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = mid_line
 
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_set_active(group='front_corner_vertices')
@@ -462,15 +575,19 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='top_line')
         bpy.ops.object.vertex_group_deselect()
-        bpy.ops.transform.translate(value=(top_line_width - shoulder_x, 0, 0))
+        
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.x = top_line_width # roof_width*diam
 
-        rear_wheel_delta = (dist_from_center_y - 1.0)+(half_diam-diam*.05)
+        #rear_wheel_delta = (dist_from_center_y - 1.0)+(half_diam-diam*.05)
 
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='rear_roof_vertices')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0, -rear_wheel_delta, 0))   
+        # bpy.ops.mesh.select_all(action='DESELECT')
+        # bpy.ops.object.vertex_group_set_active(group='rear_roof_vertices')
+        # bpy.ops.object.vertex_group_select()
+        # bpy.ops.transform.translate(value=(0, -rear_wheel_delta, 0))   
 
+        bmesh.update_edit_mesh(body_obj.data)
 
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
