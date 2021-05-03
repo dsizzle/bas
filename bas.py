@@ -476,7 +476,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
 
         for v in vehicle_bmesh.verts:
             if v.select:
-                v.co.x = roof_width*diam
+                v.co.x = roof_width
 
         bpy.ops.object.vertex_group_set_active(group='shoulder_line')
         bpy.ops.mesh.select_all(action='DESELECT')
@@ -580,12 +580,29 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
             if v.select:
                 v.co.x = top_line_width # roof_width*diam
 
-        #rear_wheel_delta = (dist_from_center_y - 1.0)+(half_diam-diam*.05)
+        rear_wheel_delta = (dist_from_center_y)-(half_diam-diam*.05)
 
-        # bpy.ops.mesh.select_all(action='DESELECT')
-        # bpy.ops.object.vertex_group_set_active(group='rear_roof_vertices')
-        # bpy.ops.object.vertex_group_select()
-        # bpy.ops.transform.translate(value=(0, -rear_wheel_delta, 0))   
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='rear_roof_vertices')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel_rear_well_vertices')
+        bpy.ops.object.vertex_group_deselect()
+
+        rear_wheel_half_delta = (rear_wheel_delta+mid_line)/2.
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = rear_wheel_half_delta
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='rear_roof_vertices')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel_front_well_vertices')
+        bpy.ops.object.vertex_group_deselect()
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = rear_wheel_delta
 
         bmesh.update_edit_mesh(body_obj.data)
 
