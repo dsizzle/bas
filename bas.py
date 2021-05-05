@@ -294,6 +294,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         windshield_angle = scene.WindshieldAngle
         wheel_gap = 0.05
         shoulder_line_height = diam * (1+(wheel_gap*2))
+        wheel_arch_width = 0.1
 
         # save selection first?
         bpy.ops.object.select_all(action='DESELECT')
@@ -371,7 +372,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         
         vehicle_bmesh = bmesh.from_edit_mesh(body_obj.data)
         
-        bpy.ops.object.vertex_group_set_active(group='front_vertices')
+        bpy.ops.object.vertex_group_set_active(group='front')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
 
@@ -379,7 +380,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
             if v.select:
                 v.co.y = 0-(dist_from_center_y + front_overhang + half_diam)
         
-        bpy.ops.object.vertex_group_set_active(group='front_wheel_vertices')
+        bpy.ops.object.vertex_group_set_active(group='front_wheel')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
 
@@ -401,23 +402,42 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
                 v.co.y -= y_mid
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='front_wheel_front_well_vertices')
+        bpy.ops.object.vertex_group_set_active(group='front_wheel_front_well')
+        bpy.ops.object.vertex_group_select()
+        
+        front_front_well_location = 0-dist_from_center_y-half_diam-(diam*wheel_gap)
+        front_rear_well_location = 0-dist_from_center_y+half_diam+(diam*wheel_gap)
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = front_front_well_location
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='front_wheel_arch_front')
+        bpy.ops.object.vertex_group_select()
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = front_front_well_location - wheel_arch_width
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='front_wheel_rear_well')
         bpy.ops.object.vertex_group_select()
         
         for v in vehicle_bmesh.verts:
             if v.select:
-                v.co.y = 0-dist_from_center_y-half_diam-(diam*wheel_gap)
+                v.co.y = front_rear_well_location
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='front_wheel_rear_well_vertices')
+        bpy.ops.object.vertex_group_set_active(group='front_wheel_arch_rear')
         bpy.ops.object.vertex_group_select()
-        
+
         for v in vehicle_bmesh.verts:
             if v.select:
-                v.co.y = 0-dist_from_center_y+half_diam+(diam*wheel_gap)
+                v.co.y = front_rear_well_location + wheel_arch_width
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='rear_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear')
         bpy.ops.object.vertex_group_select()
         
         for v in vehicle_bmesh.verts:
@@ -425,28 +445,47 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
                 v.co.y = (dist_from_center_y + rear_overhang + half_diam)
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='rear_wheel_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel')
         bpy.ops.object.vertex_group_select()
 
         for v in vehicle_bmesh.verts:
             if v.select:
                 v.co.y += y_mid
 
+        rear_front_well_location = dist_from_center_y-half_diam-(diam*wheel_gap)
+        rear_rear_well_location = dist_from_center_y+half_diam+(diam*wheel_gap)
+
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='rear_wheel_front_well_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel_front_well')
         bpy.ops.object.vertex_group_select()
 
         for v in vehicle_bmesh.verts:
             if v.select:
-                v.co.y = dist_from_center_y-half_diam-(diam*wheel_gap)
+                v.co.y = rear_front_well_location
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='rear_wheel_rear_well_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel_arch_front')
         bpy.ops.object.vertex_group_select()
 
         for v in vehicle_bmesh.verts:
             if v.select:
-                v.co.y = dist_from_center_y+half_diam+(diam*wheel_gap)
+                v.co.y = rear_front_well_location - wheel_arch_width
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel_rear_well')
+        bpy.ops.object.vertex_group_select()
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = rear_rear_well_location
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel_arch_rear')
+        bpy.ops.object.vertex_group_select()
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y = rear_rear_well_location + wheel_arch_width
 
         offset = math.sin(math.radians(45)) * half_diam * 1.2
         print (offset)
@@ -462,7 +501,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
                 v.co.z = offset+half_diam
 
         shoulder_x = scene.VehicleWidth * diam
-        bpy.ops.object.vertex_group_set_active(group='side_vertices')
+        bpy.ops.object.vertex_group_set_active(group='side')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         
@@ -470,7 +509,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
             if v.select:
                 v.co.x = shoulder_x
 
-        bpy.ops.object.vertex_group_set_active(group='roof_side_vertices')
+        bpy.ops.object.vertex_group_set_active(group='roof_side')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
 
@@ -486,7 +525,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
             if v.select:
                 v.co.z = shoulder_line_height
 
-        bpy.ops.object.vertex_group_set_active(group='skirt_vertices')
+        bpy.ops.object.vertex_group_set_active(group='side_skirt')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         
@@ -502,7 +541,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
             if v.select:
                 v.co.z = half_diam
 
-        bpy.ops.object.vertex_group_set_active(group='roof_vertices')
+        bpy.ops.object.vertex_group_set_active(group='roof')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         
@@ -518,9 +557,9 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
             if v.select:
                 v.co.z = top_line_height
 
-        bpy.ops.object.vertex_group_set_active(group='centerline_vertices')
+        bpy.ops.object.vertex_group_set_active(group='centerline')
         bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='mid_centerline_vertices')
+        bpy.ops.object.vertex_group_set_active(group='mid_centerline')
         bpy.ops.object.vertex_group_deselect()
         
         for v in vehicle_bmesh.verts:
@@ -530,14 +569,14 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         mid_centerline_width = roof_width/2
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='mid_centerline_vertices')
+        bpy.ops.object.vertex_group_set_active(group='mid_centerline')
         bpy.ops.object.vertex_group_select()
 
         for v in vehicle_bmesh.verts:
             if v.select:
                 v.co.x = mid_centerline_width
 
-        bpy.ops.object.vertex_group_set_active(group='greenhouse_vertices')
+        bpy.ops.object.vertex_group_set_active(group='greenhouse')
         bpy.ops.object.vertex_group_deselect()
 
         for v in vehicle_bmesh.verts:
@@ -546,7 +585,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
 
         hip_line_height = (shoulder_line_height+top_line_height) / 2.
 
-        bpy.ops.object.vertex_group_set_active(group='hip_line_vertices')
+        bpy.ops.object.vertex_group_set_active(group='hip_line')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         
@@ -558,7 +597,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         base_y = (top_line_height - half_diam) / math.tan(windshield_rads)
         top_y = (height - half_diam) / math.tan(windshield_rads)
         
-        bpy.ops.object.vertex_group_set_active(group='windshield_base_vertices')
+        bpy.ops.object.vertex_group_set_active(group='windshield_base')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         
@@ -566,7 +605,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
             if v.select:
                 v.co.y = 0-dist_from_center_y+base_y
 
-        bpy.ops.object.vertex_group_set_active(group='windshield_top_vertices')
+        bpy.ops.object.vertex_group_set_active(group='windshield_top')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         
@@ -580,7 +619,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         mid_line = ((top_roof_line) + (front_of_rear_wheel_well)) / 2.
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='front_back_midline_vertices')
+        bpy.ops.object.vertex_group_set_active(group='front_back_midline')
         bpy.ops.object.vertex_group_select()
         
         for v in vehicle_bmesh.verts:
@@ -588,9 +627,9 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
                 v.co.y = mid_line
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='front_corner_vertices')
+        bpy.ops.object.vertex_group_set_active(group='front_corner')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='rear_corner_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear_corner')
         bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='top_line')
         bpy.ops.object.vertex_group_deselect()
@@ -602,9 +641,9 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         rear_wheel_delta = (dist_from_center_y)-(half_diam-diam*wheel_gap)
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='rear_roof_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear_roof')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='rear_wheel_rear_well_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel_rear_well')
         bpy.ops.object.vertex_group_deselect()
 
         rear_wheel_half_delta = (rear_wheel_delta+mid_line)/2.
@@ -614,9 +653,9 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
                 v.co.y = rear_wheel_half_delta
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='rear_roof_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear_roof')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='rear_wheel_front_well_vertices')
+        bpy.ops.object.vertex_group_set_active(group='rear_wheel_front_well')
         bpy.ops.object.vertex_group_deselect()
 
         for v in vehicle_bmesh.verts:
