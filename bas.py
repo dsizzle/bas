@@ -67,13 +67,13 @@ bpy.types.Scene.FrontOverhang = FloatProperty(
     name = "Front Overhang",
     description = "Number of wheels in front of front wheel",
     default = 1.0,
-    min = 0.25, max = 2.5)
+    min = 0.25, max = 1.5)
 
 bpy.types.Scene.RearOverhang = FloatProperty(
     name = "Rear Overhang",
     description = "Number of wheels to rear of rear wheel",
     default = 0.5,
-    min = 0.25, max = 2.5)
+    min = 0.25, max = 1.5)
 
 bpy.types.Scene.WindshieldAngle = FloatProperty(
     name = "Windshield Angle",
@@ -84,8 +84,8 @@ bpy.types.Scene.WindshieldAngle = FloatProperty(
 bpy.types.Scene.WedgeAngle = FloatProperty(
     name = "Wedge Angle",
     description = "Angle of lines from front to back",
-    default = 5.0,
-    min = 0, max = 10)
+    default = 2.0,
+    min = 0, max = 3)
 
 bpy.types.Scene.CabPlacement = EnumProperty(
     name="Cab Placement",
@@ -96,6 +96,20 @@ bpy.types.Scene.CabPlacement = EnumProperty(
         ('RWD', "Rear-wheel drive", ""),
         ('MID', "Mid-Engine", ""), 
     ]) 
+
+bpy.types.Scene.FrontCurve = FloatProperty(
+    name = "Front Curvature",
+    description = "Curvature of front end",
+    default = 1.0,
+    min = 0, max = 1
+    )
+
+bpy.types.Scene.RearCurve = FloatProperty(
+    name = "Rear Curvature",
+    description = "Curvature of rear end",
+    default = 1.0,
+    min = 0, max = 1
+    )
 
 
 class WM_OT_HatchbackType(bpy.types.Operator):
@@ -253,6 +267,8 @@ class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
         layout.prop(scene, 'Wheelbase')
         layout.prop(scene, 'FrontOverhang')
         layout.prop(scene, 'RearOverhang')
+        layout.prop(scene, 'FrontCurve', slider=True)
+        layout.prop(scene, 'RearCurve', slider=True)
         layout.prop(scene, 'VehicleHeight')
         layout.prop(scene, 'WaistLine')
         layout.prop(scene, 'VehicleWidth')
@@ -395,8 +411,6 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
 
         y_mid = (y_max+y_min)/2.+dist_from_center_y
 
-        print(y_max, y_min)
-
         for v in vehicle_bmesh.verts:
             if v.select:
                 v.co.y -= y_mid
@@ -488,7 +502,6 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
                 v.co.y = rear_rear_well_location + wheel_arch_width
 
         offset = math.sin(math.radians(45)) * half_diam * 1.2
-        print (offset)
         
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_set_active(group= 'front_well_detail')
@@ -525,7 +538,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
             if v.select:
                 v.co.z = shoulder_line_height
 
-        bpy.ops.object.vertex_group_set_active(group='side_skirt')
+        bpy.ops.object.vertex_group_set_active(group='skirt')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
         
@@ -629,14 +642,23 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_set_active(group='front_corner')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='rear_corner')
-        bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='top_line')
         bpy.ops.object.vertex_group_deselect()
         
+        #front_pos = 
         for v in vehicle_bmesh.verts:
             if v.select:
-                v.co.x = top_line_width 
+                v.co.x = top_line_width+((shoulder_x-top_line_width)*(1-scene.FrontCurve))
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='rear_corner')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='top_line')
+        bpy.ops.object.vertex_group_deselect() 
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.x = top_line_width+((shoulder_x-top_line_width)*(1-scene.RearCurve))      
 
         rear_wheel_delta = (dist_from_center_y)-(half_diam-diam*wheel_gap)
 
@@ -661,6 +683,49 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         for v in vehicle_bmesh.verts:
             if v.select:
                 v.co.y = rear_wheel_delta
+
+        rear_end = (dist_from_center_y+rear_overhang+half_diam)
+        front_end = 0-(dist_from_center_y+front_overhang+half_diam)
+        
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='front_corner')
+        bpy.ops.object.vertex_group_select()
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y += front_overhang*(1./2.)*(scene.FrontCurve)
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='front')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='centerline')
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='side')
+        bpy.ops.object.vertex_group_deselect()
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y += front_overhang*(1./8.)*(scene.FrontCurve)
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='rear_corner')
+        bpy.ops.object.vertex_group_select()
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y -= rear_overhang*(1./2.)*(scene.RearCurve)
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group='rear')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='centerline')
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='side')
+        bpy.ops.object.vertex_group_deselect()
+
+        for v in vehicle_bmesh.verts:
+            if v.select:
+                v.co.y -= rear_overhang*(1./8.)*(scene.RearCurve)
 
         bmesh.update_edit_mesh(body_obj.data)
 
