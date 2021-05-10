@@ -28,6 +28,25 @@ def vertex_multiselect(select_list, deselect_list=[], deselect=True):
         bpy.ops.object.vertex_group_set_active(group=group_name)
         bpy.ops.object.vertex_group_deselect()
 
+def vertex_transform(mesh, x=None, y=None, z=None, relative=False):
+    for v in mesh.verts:
+        if v.select:
+            if x:
+                if relative:
+                    v.co.x += x
+                else:
+                    v.co.x = x
+            if y:
+                if relative:
+                    v.co.y += y
+                else:
+                    v.co.y = y
+            if z:
+                if relative:
+                    v.co.z += z
+                else:
+                    v.co.z = z
+  
 # Store properties in the active scene
 #
 bpy.types.Scene.TireWidth = FloatProperty(
@@ -405,10 +424,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         vehicle_bmesh = bmesh.from_edit_mesh(body_obj.data)
         
         vertex_multiselect(['front'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = 0-(dist_from_center_y + front_overhang + half_diam)
+        vertex_transform(vehicle_bmesh, y=0-(dist_from_center_y + front_overhang + half_diam))
         
         vertex_multiselect(['front_wheel'])
 
@@ -423,171 +439,97 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
 
         y_mid = (y_max+y_min)/2.+dist_from_center_y
 
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y -= y_mid
-
-        vertex_multiselect(['front_wheel_front_well'])
+        vertex_transform(vehicle_bmesh, y=-y_mid, relative=True)
         
         front_front_well_location = 0-dist_from_center_y-half_diam-(diam*wheel_gap)
         front_rear_well_location = 0-dist_from_center_y+half_diam+(diam*wheel_gap)
 
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = front_front_well_location
-
+        vertex_multiselect(['front_wheel_front_well'])
+        vertex_transform(vehicle_bmesh, y=front_front_well_location)
+        
         vertex_multiselect(['front_wheel_arch_front'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = front_front_well_location - wheel_arch_width
-
+        vertex_transform(vehicle_bmesh, y=front_front_well_location-wheel_arch_width)
+        
         vertex_multiselect(['front_wheel_rear_well'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = front_rear_well_location
-
+        vertex_transform(vehicle_bmesh, y=front_rear_well_location)
+             
         vertex_multiselect(['front_wheel_arch_rear'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = front_rear_well_location + wheel_arch_width
-
-        vertex_multiselect(['rear'])
+        vertex_transform(vehicle_bmesh, y=front_rear_well_location+wheel_arch_width)
         
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = (dist_from_center_y + rear_overhang + half_diam)
-
+        vertex_multiselect(['rear'])
+        vertex_transform(vehicle_bmesh, y=(dist_from_center_y + rear_overhang + half_diam))
+        
         vertex_multiselect(['rear_wheel'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y += y_mid
-
+        vertex_transform(vehicle_bmesh, y=y_mid, relative=True)
+        
         rear_front_well_location = dist_from_center_y-half_diam-(diam*wheel_gap)
         rear_rear_well_location = dist_from_center_y+half_diam+(diam*wheel_gap)
 
         vertex_multiselect(['rear_wheel_front_well'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = rear_front_well_location
+        vertex_transform(vehicle_bmesh, y=rear_front_well_location)
 
         vertex_multiselect(['rear_wheel_arch_front'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = rear_front_well_location - wheel_arch_width
+        vertex_transform(vehicle_bmesh, y=rear_front_well_location-wheel_arch_width)
 
         vertex_multiselect(['rear_wheel_rear_well'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = rear_rear_well_location
+        vertex_transform(vehicle_bmesh, y=rear_rear_well_location)
 
         vertex_multiselect(['rear_wheel_arch_rear'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = rear_rear_well_location + wheel_arch_width
-
+        vertex_transform(vehicle_bmesh, y=rear_rear_well_location+wheel_arch_width)
+       
         offset = math.sin(math.radians(45)) * half_diam * 1.2
         
         vertex_multiselect(['front_well_detail','rear_well_detail'])
+        vertex_transform(vehicle_bmesh, z=offset+half_diam)
         
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.z = offset+half_diam
-
         shoulder_x = scene.VehicleWidth * diam
         
         vertex_multiselect(['side'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.x = shoulder_x
+        vertex_transform(vehicle_bmesh, x=shoulder_x)
 
         vertex_multiselect(['roof_side'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.x = roof_width
+        vertex_transform(vehicle_bmesh, x=roof_width)
 
         vertex_multiselect(['shoulder_line'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.z = shoulder_line_height
+        vertex_transform(vehicle_bmesh, z=shoulder_line_height)
 
         vertex_multiselect(['skirt'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.z = quarter_diam
+        vertex_transform(vehicle_bmesh, z=quarter_diam)
 
         vertex_multiselect(['mid_line'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.z = half_diam
+        vertex_transform(vehicle_bmesh, z=half_diam)
 
         vertex_multiselect(['roof'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.z = height
+        vertex_transform(vehicle_bmesh, z=height)
 
         vertex_multiselect(['top_line'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.z = top_line_height
+        vertex_transform(vehicle_bmesh, z=top_line_height)
 
         vertex_multiselect([],['centerline','mid_centerline'], False)
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.x = top_line_width
+        vertex_transform(vehicle_bmesh, x=top_line_width)
 
         mid_centerline_width = roof_width/2
 
         vertex_multiselect(['mid_centerline'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.x = mid_centerline_width
+        vertex_transform(vehicle_bmesh, x=mid_centerline_width)
 
         vertex_multiselect([],['greenhouse'], False)
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.x = top_line_width/2        
+        vertex_transform(vehicle_bmesh, x=top_line_width/2)
 
         hip_line_height = (shoulder_line_height+top_line_height) / 2.
 
         vertex_multiselect(['hip_line'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.z = hip_line_height
+        vertex_transform(vehicle_bmesh, z=hip_line_height)
 
         windshield_rads = math.radians(windshield_angle)
         base_y = (top_line_height - half_diam) / math.tan(windshield_rads)
         top_y = (height - half_diam) / math.tan(windshield_rads)
         
         vertex_multiselect(['windshield_base'])
+        vertex_transform(vehicle_bmesh, y=0-dist_from_center_y+base_y)
         
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = 0-dist_from_center_y+base_y
-
         vertex_multiselect(['windshield_top'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = 0-dist_from_center_y+top_y
+        vertex_transform(vehicle_bmesh, y=0-dist_from_center_y+top_y)
 
         front_of_rear_wheel_well = dist_from_center_y - half_diam - (diam * wheel_gap)
         top_roof_line = 0 - dist_from_center_y + top_y
@@ -595,65 +537,42 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         mid_line = ((top_roof_line) + (front_of_rear_wheel_well)) / 2.
 
         vertex_multiselect(['front_back_midline'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = mid_line
+        vertex_transform(vehicle_bmesh, y=mid_line)
 
+        top_line_corner_base = (shoulder_x-top_line_width)
+        top_line_front = top_line_corner_base*(1-scene.FrontCurve)
+        top_line_rear = top_line_corner_base*(1-scene.RearCurve)
+            
         vertex_multiselect(['front_corner'],['top_line'])
-        
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.x = top_line_width+((shoulder_x-top_line_width)*(1-scene.FrontCurve))
+        vertex_transform(vehicle_bmesh, x=top_line_front+top_line_width)
 
         vertex_multiselect(['rear_corner'],['top_line'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.x = top_line_width+((shoulder_x-top_line_width)*(1-scene.RearCurve))      
+        vertex_transform(vehicle_bmesh, x=top_line_rear+top_line_width)
 
         rear_wheel_delta = (dist_from_center_y)-(half_diam-diam*wheel_gap)
+        rear_wheel_half_delta = (rear_wheel_delta+mid_line)/2.
 
         vertex_multiselect(['rear_roof'],['rear_wheel_rear_well'])
-
-        rear_wheel_half_delta = (rear_wheel_delta+mid_line)/2.
+        vertex_transform(vehicle_bmesh, y=rear_wheel_half_delta)
 
         for v in vehicle_bmesh.verts:
             if v.select:
                 v.co.y = rear_wheel_half_delta
 
         vertex_multiselect(['rear_roof'],['rear_wheel_front_well'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y = rear_wheel_delta
-
-        rear_end = (dist_from_center_y+rear_overhang+half_diam)
-        front_end = 0-(dist_from_center_y+front_overhang+half_diam)
+        vertex_transform(vehicle_bmesh, y=rear_wheel_delta)
         
         vertex_multiselect(['front_corner'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y += front_overhang*(1./2.)*(scene.FrontCurve)
+        vertex_transform(vehicle_bmesh, y=front_overhang*(1./2.)*(scene.FrontCurve), relative=True)
 
         vertex_multiselect(['front'],['centerline','side'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y += front_overhang*(1./8.)*(scene.FrontCurve)
+        vertex_transform(vehicle_bmesh, y=front_overhang*(1./8.)*(scene.FrontCurve), relative=True)
 
         vertex_multiselect(['rear_corner'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y -= rear_overhang*(1./2.)*(scene.RearCurve)
+        vertex_transform(vehicle_bmesh, y=-(rear_overhang*(1./2.)*(scene.RearCurve)), relative=True)
 
         vertex_multiselect(['rear'],['centerline','side'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.y -= rear_overhang*(1./8.)*(scene.RearCurve)
+        vertex_transform(vehicle_bmesh, y=-(rear_overhang*(1./8.)*(scene.RearCurve)), relative=True)
 
         vertex_multiselect(['front_wheel_front_well'],['mid_centerline','side','bottom','mid_line'])
 
@@ -665,10 +584,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.transform.rotate(value=wedge_rads, orient_axis='X')
 
         vertex_multiselect(['centerline','mid_centerline'],['bottom','front','rear_bumper'])
-
-        for v in vehicle_bmesh.verts:
-            if v.select:
-                v.co.z += 0.05
+        vertex_transform(vehicle_bmesh, z=0.05, relative=True)
 
         bmesh.update_edit_mesh(body_obj.data)
 
@@ -676,6 +592,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
         return{'FINISHED'}
+
 
 classes = (
     WM_OT_HatchbackType,
