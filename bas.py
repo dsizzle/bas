@@ -169,6 +169,7 @@ class WM_OT_HatchbackType(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class WM_OT_MidsizeSedanType(bpy.types.Operator):
     bl_label = "Midsize Sedan"
     bl_idname = "wm.midsize_sedan_type"
@@ -192,6 +193,7 @@ class WM_OT_MidsizeSedanType(bpy.types.Operator):
         scene.CabPlacement = 'FWD'
 
         return {'FINISHED'}
+
 
 class WM_OT_LuxurySedanType(bpy.types.Operator):
     bl_label = "Luxury Sedan"
@@ -217,6 +219,7 @@ class WM_OT_LuxurySedanType(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class WM_OT_SportsGTType(bpy.types.Operator):
     bl_label = "Sports GT"
     bl_idname = "wm.sports_gt_type"
@@ -240,6 +243,7 @@ class WM_OT_SportsGTType(bpy.types.Operator):
         scene.CabPlacement = 'RWD'
 
         return {'FINISHED'}
+
 
 class WM_OT_SportsMidEngineType(bpy.types.Operator):
     bl_label = "Sports Mid-engine"
@@ -265,6 +269,7 @@ class WM_OT_SportsMidEngineType(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class OBJECT_MT_PresetMenu(bpy.types.Menu):
     bl_label = "Preset"
     bl_idname = "mt.preset_menu"
@@ -279,9 +284,9 @@ class OBJECT_MT_PresetMenu(bpy.types.Menu):
         layout.operator(WM_OT_SportsGTType.bl_idname, text=WM_OT_SportsGTType.bl_label)
         layout.operator(WM_OT_SportsMidEngineType.bl_idname, text=WM_OT_SportsMidEngineType.bl_label)
 
+
 # Set up panel layout
 class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
-
     bl_label = "Blender Auto Studio"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
