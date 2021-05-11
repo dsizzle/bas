@@ -344,11 +344,28 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.vertex_group_set_active(group='tire_profile_vertices')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0.0, 0.0, -0.5+(tire_width/2.)), constraint_axis=(False, False, True))        
+        bpy.ops.transform.translate(value=(0.0, 0.0, -0.5+(tire_width/2.)))#, constraint_axis=(False, False, True))        
         
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
         bpy.ops.object.modifier_apply(modifier='Array')
         bpy.ops.transform.rotate(value=1.5708, orient_axis='Y')
+        bpy.ops.transform.translate(value=(0.0, 0.0, tire_diam/2.))
+
+    def _place_wheels(self, tire_obj, dist_from_center_x, dist_from_center_y):
+        bpy.ops.object.select_all(action='DESELECT')
+        tire_obj.select_set(True)
+        bpy.context.view_layer.objects.active = tire_obj
+        bpy.context.object.name="rear_left_wheel"
+        bpy.ops.transform.translate(value=(dist_from_center_x, dist_from_center_y, 0))
+        bpy.ops.object.duplicate()
+        bpy.context.object.name="rear_right_wheel"
+        bpy.ops.transform.translate(value=(-dist_from_center_x*2., 0, 0))
+        bpy.ops.object.duplicate()
+        bpy.context.object.name="front_right_wheel"
+        bpy.ops.transform.translate(value=(0, -dist_from_center_y*2., 0))
+        bpy.ops.object.duplicate()
+        bpy.context.object.name="front_left_wheel"
+        bpy.ops.transform.translate(value=(dist_from_center_x*2., 0, 0))
 
     def execute(self, context):
         scene = context.scene
@@ -394,17 +411,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         
         self._make_wheel(tire_obj, diam, tire_width, wheel_diam)
 
-        bpy.context.object.name="rear_left_wheel"
-        bpy.ops.transform.translate(value=(dist_from_center_x, dist_from_center_y, half_diam))
-        bpy.ops.object.duplicate()
-        bpy.context.object.name="rear_right_wheel"
-        bpy.ops.transform.translate(value=(-dist_from_center_x*2., 0, 0))
-        bpy.ops.object.duplicate()
-        bpy.context.object.name="front_right_wheel"
-        bpy.ops.transform.translate(value=(0, -dist_from_center_y*2., 0))
-        bpy.ops.object.duplicate()
-        bpy.context.object.name="front_left_wheel"
-        bpy.ops.transform.translate(value=(dist_from_center_x*2., 0, 0))
+        self._place_wheels(tire_obj, dist_from_center_x, dist_from_center_y)
                         
         bpy.ops.object.empty_add(type='CUBE', location=(0, 0, 0))
         bpy.context.object.scale=(dist_from_center_x + tire_width / 2., \
