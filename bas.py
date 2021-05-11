@@ -320,6 +320,36 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
     bl_idname = "execute.makecar"
     bl_label = "Make Vehicle"
 
+    def _make_wheel(self, tire_obj, tire_diam, tire_width, wheel_diam):
+        sidewall_diam = tire_diam * 3. / 4.
+        
+        bpy.ops.object.select_all(action='DESELECT')
+        tire_obj.select_set(True)
+        bpy.context.view_layer.objects.active = tire_obj
+        bpy.ops.view3d.snap_cursor_to_selected()
+        bpy.context.scene.tool_settings.transform_pivot_point = 'CURSOR'
+        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+        bpy.ops.object.vertex_group_set_active(group='tire_inner_vertices')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.resize(value=(wheel_diam * 2.0, wheel_diam * 2.0, 1.0), constraint_axis=(True, True, False))
+        bpy.ops.object.vertex_group_set_active(group='tire_outer_vertices')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.resize(value=(tire_diam, tire_diam, 1.0), constraint_axis=(True, True, False))
+        bpy.ops.object.vertex_group_set_active(group='tire_sidewall_vertices')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.resize(value=(sidewall_diam, sidewall_diam, 1.0), constraint_axis=(True, True, False))        
+        bpy.ops.object.vertex_group_set_active(group='tire_profile_vertices')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.transform.translate(value=(0.0, 0.0, -0.5+(tire_width/2.)), constraint_axis=(False, False, True))        
+        
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+        bpy.ops.object.modifier_apply(modifier='Array')
+        bpy.ops.transform.rotate(value=1.5708, orient_axis='Y')
+
     def execute(self, context):
         scene = context.scene
         override = context.copy() # dictionary of context
@@ -329,11 +359,10 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         half_diam = diam / 2.0
         quarter_diam = diam / 4.0
         wheel_diam = scene.WheelDiameter * .0254
-        sidewall_diam = ((half_diam) + diam) / 2.0
-        width = scene.TireWidth / 1000.0
+        tire_width = scene.TireWidth / 1000.0
         dist_from_center_y = (diam * scene.Wheelbase) / 2. + (half_diam)
         dist_from_center_y_in = (diam * scene.Wheelbase) / 2.
-        dist_from_center_x = (diam * scene.VehicleWidth) - (width / 2.)
+        dist_from_center_x = (diam * scene.VehicleWidth) - (tire_width / 2.)
         front_overhang = (diam * scene.FrontOverhang) 
         rear_overhang = (diam * scene.RearOverhang) 
         overhang_diff = rear_overhang - front_overhang
@@ -341,7 +370,6 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         top_line_height = diam * scene.WaistLine
         top_line_width = diam * scene.WaistWidth
         roof_width = diam * scene.RoofWidth
-        windshield_angle = scene.WindshieldAngle
         wheel_gap = 0.05
         shoulder_line_height = diam * (1+(wheel_gap*2))
         wheel_arch_width = 0.1
@@ -363,40 +391,9 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.wm.append(filename="base_vehicle", directory="D:/Projects/art/3d/vehicles/car_model.blend\\Object\\")
         body_obj = bpy.context.selected_objects[0]
+        
+        self._make_wheel(tire_obj, diam, tire_width, wheel_diam)
 
-        #---------------- ??
-        #wheel_mesh = bpy.context.object.data
-        #bm = bmesh.from_edit_mesh(wheel_mesh)
-        
-        #bm.update_edit_mesh(wheel_mesh, True)
-        #---------------- ??
-        
-        bpy.ops.object.select_all(action='DESELECT')
-        tire_obj.select_set(True)
-        bpy.context.view_layer.objects.active = tire_obj
-        bpy.ops.view3d.snap_cursor_to_selected()
-        bpy.context.scene.tool_settings.transform_pivot_point = 'CURSOR'
-        #bpy.context.space_data.pivot_point = 'CURSOR'
-        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-        bpy.ops.object.vertex_group_set_active(group='tire_inner_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.resize(value=(wheel_diam * 2.0, wheel_diam * 2.0, 1.0), constraint_axis=(True, True, False))
-        bpy.ops.object.vertex_group_set_active(group='tire_outer_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.resize(value=(diam, diam, 1.0), constraint_axis=(True, True, False))
-        bpy.ops.object.vertex_group_set_active(group='tire_sidewall_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.resize(value=(sidewall_diam, sidewall_diam, 1.0), constraint_axis=(True, True, False))        
-        bpy.ops.object.vertex_group_set_active(group='tire_profile_vertices')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.transform.translate(value=(0.0, 0.0, -0.5+(width/2.)), constraint_axis=(False, False, True))        
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-        bpy.ops.object.modifier_apply(modifier='Array')
-        bpy.ops.transform.rotate(value=1.5708, orient_axis='Y') #axis=(0.0, 1.0, 0.0))
         bpy.context.object.name="rear_left_wheel"
         bpy.ops.transform.translate(value=(dist_from_center_x, dist_from_center_y, half_diam))
         bpy.ops.object.duplicate()
@@ -410,7 +407,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         bpy.ops.transform.translate(value=(dist_from_center_x*2., 0, 0))
                         
         bpy.ops.object.empty_add(type='CUBE', location=(0, 0, 0))
-        bpy.context.object.scale=(dist_from_center_x + width / 2., \
+        bpy.context.object.scale=(dist_from_center_x + tire_width / 2., \
             ((dist_from_center_y * 2) + front_overhang + rear_overhang + diam) / 2., \
             height / 2.)
         bpy.context.object.location=(0, overhang_diff / 2., height/ 2.)
@@ -521,7 +518,7 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         vertex_multiselect(['hip_line'])
         vertex_transform(vehicle_bmesh, z=hip_line_height)
 
-        windshield_rads = math.radians(windshield_angle)
+        windshield_rads = math.radians(scene.WindshieldAngle)
         base_y = (top_line_height - half_diam) / math.tan(windshield_rads)
         top_y = (height - half_diam) / math.tan(windshield_rads)
         
