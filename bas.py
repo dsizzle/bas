@@ -144,6 +144,12 @@ bpy.types.Scene.RearCurve = FloatProperty(
     min = 0, max = 1
     )
 
+bpy.types.Scene.FrontSlope = FloatProperty(
+    name = "Front Slope",
+    description = "Slope of front end",
+    default = 1.0,
+    min = 0, max = 1 
+    )
 
 class WM_OT_HatchbackType(bpy.types.Operator):
     bl_label = "Hatchback"
@@ -304,8 +310,9 @@ class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
         
         layout.prop(scene, 'Wheelbase')
         layout.prop(scene, 'FrontOverhang')
-        layout.prop(scene, 'RearOverhang')
         layout.prop(scene, 'FrontCurve', slider=True)
+        layout.prop(scene, 'FrontSlope', slider=True)
+        layout.prop(scene, 'RearOverhang')
         layout.prop(scene, 'RearCurve', slider=True)
         layout.prop(scene, 'VehicleHeight')
         layout.prop(scene, 'WaistLine')
@@ -583,17 +590,27 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         vertex_multiselect(['rear'],['centerline','side'])
         vertex_transform(vehicle_bmesh, y=-(rear_overhang*(1./8.)*(scene.RearCurve)), relative=True)
 
-        vertex_multiselect(['front_wheel_front_well'],['mid_centerline','side','bottom','mid_line'])
+        vertex_multiselect(['front_back_midline'],['hip_line','shoulder_line','bottom','mid_line','roof'])
 
         bpy.ops.view3d.snap_cursor_to_selected()
         bpy.context.scene.tool_settings.transform_pivot_point = 'CURSOR'
 
-        vertex_multiselect(['top_line'], deselect=False)
+        vertex_multiselect(['top_line','front'], ['bottom','mid_line'])
 
         bpy.ops.transform.rotate(value=wedge_rads, orient_axis='X')
 
         vertex_multiselect(['centerline','mid_centerline'],['bottom','front','rear_bumper'])
         vertex_transform(vehicle_bmesh, z=0.05, relative=True)
+
+        front_slope_base = (shoulder_line_height-half_diam)*scene.FrontSlope
+        vertex_multiselect(['front'],['bottom','mid_line'])
+        vertex_transform(vehicle_bmesh, z=-(front_slope_base)*(2./3.), relative=True)
+
+        vertex_multiselect(['front_wheel_front_well'],['front_wheel_arch','bottom','mid_line','shoulder_line'])
+        vertex_transform(vehicle_bmesh, z=-(front_slope_base)*(1./3.), relative=True)
+
+        vertex_multiselect(['front_wheel'],['front_wheel_arch','front_wheel_rear_well','front_wheel_front_well','shoulder_line','front_well_detail','rear_well_detail'])
+        vertex_transform(vehicle_bmesh, z=-(front_slope_base)*(1./6.), relative=True)
 
         bmesh.update_edit_mesh(body_obj.data)
 
