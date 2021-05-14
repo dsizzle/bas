@@ -52,7 +52,7 @@ def vertex_transform(mesh, x=None, y=None, z=None, relative=False):
 bpy.types.Scene.TireWidth = FloatProperty(
     name = "Tire Width", 
     description = "Width of tire (mm)",
-    default = 215)
+    default = 225)
 
 bpy.types.Scene.TireSidewall = FloatProperty(
     name = "Tire Sidewall", 
@@ -150,6 +150,7 @@ bpy.types.Scene.FrontSlope = FloatProperty(
     default = 1.0,
     min = 0, max = 1 
     )
+
 
 class WM_OT_HatchbackType(bpy.types.Operator):
     bl_label = "Hatchback"
@@ -276,8 +277,104 @@ class WM_OT_SportsMidEngineType(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WM_OT_225_65R17Type(bpy.types.Operator):
+    bl_label = "225/65R17"
+    bl_idname = "wm.225_65r17_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 225
+        scene.TireSidewall = 65
+        scene.WheelDiameter = 17
+
+        return {'FINISHED'}
+
+
+class WM_OT_235_45R18Type(bpy.types.Operator):
+    bl_label = "235/45R18"
+    bl_idname = "wm.235_45r18_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 235
+        scene.TireSidewall = 45
+        scene.WheelDiameter = 18
+
+        return {'FINISHED'}
+
+
+class WM_OT_235_60R18Type(bpy.types.Operator):
+    bl_label = "235/60R18"
+    bl_idname = "wm.235_60r18_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 235
+        scene.TireSidewall = 60
+        scene.WheelDiameter = 18
+
+        return {'FINISHED'}
+
+
+class WM_OT_245_60R18Type(bpy.types.Operator):
+    bl_label = "245/60R18"
+    bl_idname = "wm.245_60r18_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 245
+        scene.TireSidewall = 60
+        scene.WheelDiameter = 18
+
+        return {'FINISHED'}
+
+
+class WM_OT_235_40R19Type(bpy.types.Operator):
+    bl_label = "235/40R19"
+    bl_idname = "wm.235_40r19_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 235
+        scene.TireSidewall = 40
+        scene.WheelDiameter = 19
+
+        return {'FINISHED'}
+
+
+class WM_OT_275_55R20Type(bpy.types.Operator):
+    bl_label = "275/55R20"
+    bl_idname = "wm.275_55r20_type"
+
+    def execute(self, context):
+        scene = context.scene
+
+        scene.TireWidth = 275
+        scene.TireSidewall = 55
+        scene.WheelDiameter = 20
+
+        return {'FINISHED'}
+
+# bpy.types.Scene.TireSizes = EnumProperty(
+#     name="Tire Size Presets",
+#     description="",
+#     default='225/65R17',
+#     items=[
+#             ("225/65R17"),
+#             ("235/45R18"),
+#             ("235/60R18"),
+#             ("245/60R18"),
+#             ("235/40R19"),
+#             ("275/55R20"),
+#     ])
+
 class OBJECT_MT_PresetMenu(bpy.types.Menu):
-    bl_label = "Preset"
+    bl_label = "Vehicle Preset"
     bl_idname = "mt.preset_menu"
 
     def draw(self, context):
@@ -291,6 +388,21 @@ class OBJECT_MT_PresetMenu(bpy.types.Menu):
         layout.operator(WM_OT_SportsMidEngineType.bl_idname, text=WM_OT_SportsMidEngineType.bl_label)
 
 
+class OBJECT_MT_TirePresetMenu(bpy.types.Menu):
+    bl_label = "Tire Preset"
+    bl_idname = "mt.tire_preset_menu"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator(WM_OT_225_65R17Type.bl_idname, text=WM_OT_225_65R17Type.bl_label)
+        layout.operator(WM_OT_235_45R18Type.bl_idname, text=WM_OT_235_45R18Type.bl_label)
+        layout.operator(WM_OT_235_60R18Type.bl_idname, text=WM_OT_235_60R18Type.bl_label)
+        layout.operator(WM_OT_245_60R18Type.bl_idname, text=WM_OT_245_60R18Type.bl_label)
+        layout.operator(WM_OT_235_40R19Type.bl_idname, text=WM_OT_235_60R18Type.bl_label)
+        layout.operator(WM_OT_275_55R20Type.bl_idname, text=WM_OT_235_60R18Type.bl_label)
+
+
 # Set up panel layout
 class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
     bl_label = "Blender Auto Studio"
@@ -301,6 +413,8 @@ class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
         scene = context.scene
         layout = self.layout
 
+        layout.menu(OBJECT_MT_TirePresetMenu.bl_idname, text=OBJECT_MT_TirePresetMenu.bl_label)
+        
         layout.prop(scene, 'TireWidth')
         layout.prop(scene, 'TireSidewall')
         layout.prop(scene, 'WheelDiameter')
@@ -626,6 +740,15 @@ classes = (
     WM_OT_LuxurySedanType,
     WM_OT_SportsGTType,
     WM_OT_SportsMidEngineType,
+
+    WM_OT_225_65R17Type,
+    WM_OT_235_45R18Type,
+    WM_OT_235_60R18Type,
+    WM_OT_245_60R18Type,
+    WM_OT_235_40R19Type,
+    WM_OT_275_55R20Type,
+
+    OBJECT_MT_TirePresetMenu,
     OBJECT_MT_PresetMenu,
     OBJECT_PT_ToolPropsPanel,
     OBJECT_OT_ExecuteButton
