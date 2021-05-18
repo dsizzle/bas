@@ -360,18 +360,6 @@ class WM_OT_275_55R20Type(bpy.types.Operator):
 
         return {'FINISHED'}
 
-# bpy.types.Scene.TireSizes = EnumProperty(
-#     name="Tire Size Presets",
-#     description="",
-#     default='225/65R17',
-#     items=[
-#             ("225/65R17"),
-#             ("235/45R18"),
-#             ("235/60R18"),
-#             ("245/60R18"),
-#             ("235/40R19"),
-#             ("275/55R20"),
-#     ])
 
 class OBJECT_MT_PresetMenu(bpy.types.Menu):
     bl_label = "Vehicle Preset"
