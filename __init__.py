@@ -5,9 +5,17 @@ bl_info = { "name": "Blender Auto Studio",
             "category": "Object",
             "author": "Dale Cieslak"}
 
+import importlib
+
 import bpy
 
 from . import bas
+from . import properties
+from . import mesh_utils
+
+importlib.reload(bas)
+importlib.reload(properties)
+importlib.reload(mesh_utils)
 
 classes = (
     bas.WM_OT_HatchbackType,
