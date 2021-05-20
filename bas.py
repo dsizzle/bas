@@ -282,7 +282,7 @@ class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
         layout.prop(scene, 'RoofWidth')
         layout.prop(scene, 'WindshieldAngle')
         layout.prop(scene, 'WedgeAngle')
-        #layout.prop(scene, 'CabPlacement')
+        layout.prop(scene, 'CabPlacement')
 
         layout.separator()
         #layout.prop(scene, 'AllObjects')
@@ -552,6 +552,15 @@ class OBJECT_OT_ExecuteButton(bpy.types.Operator):
         vertex_transform(vehicle_bmesh, y=-(rear_overhang*(1./8.)*(scene.RearCurve)), relative=True)
 
         vertex_multiselect(['front_back_midline'],['hip_line','shoulder_line','bottom','mid_line','roof'])
+
+        vertex_multiselect(['greenhouse'])
+        
+        if scene.CabPlacement == 'FWD':
+            adjusted_base_y = top_line_height / math.tan(windshield_rads)
+            vertex_transform(vehicle_bmesh, y=base_y-adjusted_base_y, relative=True)
+        elif scene.CabPlacement == 'MID':
+            adjusted_base_y = ((top_line_height / math.tan(windshield_rads))+half_diam)
+            vertex_transform(vehicle_bmesh, y=base_y-adjusted_base_y, relative=True)    
 
         bpy.ops.view3d.snap_cursor_to_selected()
         bpy.context.scene.tool_settings.transform_pivot_point = 'CURSOR'
