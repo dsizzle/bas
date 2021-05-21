@@ -6,9 +6,8 @@
 import bpy
 import bmesh
 import math
-from bpy.props import *
+
 from .mesh_utils import *
-from . import properties
 
 def make_wheel(tire_obj, tire_diam, tire_width, wheel_diam):
     sidewall_diam = tire_diam * 3. / 4.
