@@ -9,8 +9,8 @@ class WM_OT_HatchbackType(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
 
-        scene.TireWidth = 215
-        scene.TireSidewall = 50
+        scene.TireWidth = 225
+        scene.TireSidewall = 65
         scene.WheelDiameter = 17
 
         scene.Wheelbase = 3.25
@@ -23,6 +23,9 @@ class WM_OT_HatchbackType(bpy.types.Operator):
         scene.WaistWidth = 1.17
         scene.RoofWidth = 0.8
         scene.CabPlacement = 'FWD'
+        scene.FrontCurve = 0.5
+        scene.RearCurve = 0.5
+        scene.FrontSlope = 0.5
 
         return {'FINISHED'}
 
@@ -34,9 +37,9 @@ class WM_OT_MidsizeSedanType(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
 
-        scene.TireWidth = 225
-        scene.TireSidewall = 50
-        scene.WheelDiameter = 17
+        scene.TireWidth = 235
+        scene.TireSidewall = 45
+        scene.WheelDiameter = 18
 
         scene.Wheelbase = 3.5
         scene.FrontOverhang = 0.75
@@ -48,6 +51,9 @@ class WM_OT_MidsizeSedanType(bpy.types.Operator):
         scene.WaistWidth = 1.17
         scene.RoofWidth = 0.8
         scene.CabPlacement = 'FWD'
+        scene.FrontCurve = 0.25
+        scene.RearCurve = 0.25
+        scene.FrontSlope = 0.5
 
         return {'FINISHED'}
 
@@ -59,9 +65,9 @@ class WM_OT_LuxurySedanType(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
 
-        scene.TireWidth = 245
-        scene.TireSidewall = 50
-        scene.WheelDiameter = 19
+        scene.TireWidth = 235
+        scene.TireSidewall = 60
+        scene.WheelDiameter = 18
 
         scene.Wheelbase = 3.75
         scene.FrontOverhang = 0.75
@@ -73,6 +79,9 @@ class WM_OT_LuxurySedanType(bpy.types.Operator):
         scene.WaistWidth = 1.17
         scene.RoofWidth = 0.8
         scene.CabPlacement = 'RWD'
+        scene.FrontCurve = 0.25
+        scene.RearCurve = 0.1
+        scene.FrontSlope = 0.25
 
         return {'FINISHED'}
 
@@ -85,8 +94,8 @@ class WM_OT_SportsGTType(bpy.types.Operator):
         scene = context.scene
 
         scene.TireWidth = 235
-        scene.TireSidewall = 50
-        scene.WheelDiameter = 18
+        scene.TireSidewall = 40
+        scene.WheelDiameter = 19
 
         scene.Wheelbase = 2.8
         scene.FrontOverhang = 0.5
@@ -98,6 +107,9 @@ class WM_OT_SportsGTType(bpy.types.Operator):
         scene.WaistWidth = 1.2
         scene.RoofWidth = 0.8
         scene.CabPlacement = 'RWD'
+        scene.FrontCurve = 0.75 
+        scene.RearCurve = 0.5
+        scene.FrontSlope = .75
 
         return {'FINISHED'}
 
@@ -109,9 +121,9 @@ class WM_OT_SportsMidEngineType(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
 
-        scene.TireWidth = 245
-        scene.TireSidewall = 35
-        scene.WheelDiameter = 19
+        scene.TireWidth = 275
+        scene.TireSidewall = 55
+        scene.WheelDiameter = 20
 
         scene.Wheelbase = 2.75
         scene.FrontOverhang = 0.75
@@ -123,6 +135,9 @@ class WM_OT_SportsMidEngineType(bpy.types.Operator):
         scene.WaistWidth = 1.25
         scene.RoofWidth = 0.75
         scene.CabPlacement = 'MID'
+        scene.FrontCurve = 1
+        scene.RearCurve = 1
+        scene.FrontSlope = 1
 
         return {'FINISHED'}
 
@@ -209,7 +224,7 @@ class WM_OT_275_55R20Type(bpy.types.Operator):
         scene.WheelDiameter = 20
 
         return {'FINISHED'}
-        
+
 
 class OBJECT_MT_PresetMenu(bpy.types.Menu):
     bl_label = "Vehicle Preset"
@@ -276,7 +291,6 @@ class OBJECT_PT_ToolPropsPanel(bpy.types.Panel):
         layout.prop(scene, 'CabPlacement')
 
         layout.separator()
-        #layout.prop(scene, 'AllObjects')
         layout.operator('execute.makecar')
     
 
