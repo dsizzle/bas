@@ -207,6 +207,7 @@ def make_vehicle(context):
     vertex_transform(vehicle_bmesh, x=mid_centerline_width)
 
     vertex_multiselect([],['greenhouse'], False)
+    vertex_multiselect(['windshield_base','rearwindow_base'],['centerline','side'], False)
     vertex_transform(vehicle_bmesh, x=top_line_width/2)
 
     hip_line_height = (shoulder_line_height+top_line_height) / 2.
