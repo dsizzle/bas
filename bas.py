@@ -78,6 +78,7 @@ def make_vehicle(context):
     roof_width = diam * scene.RoofWidth
     wheel_gap = 0.05
     shoulder_line_height = diam * (1+(wheel_gap*2))
+    hip_line_height = (shoulder_line_height+top_line_height) / 2.
     wheel_arch_width = 0.1
     wedge_rads = scene.WedgeAngle * math.pi / 180.
 
@@ -195,6 +196,12 @@ def make_vehicle(context):
     vertex_multiselect(['roof'])
     vertex_transform(vehicle_bmesh, z=height)
 
+    vertex_multiselect(['character_line'])
+    vertex_transform(vehicle_bmesh, z=(top_line_height+hip_line_height)/2.)    
+
+    vertex_multiselect(['character_line'],['front','rear'])
+    vertex_transform(vehicle_bmesh, x=((shoulder_x-top_line_width)/(3./2.))+top_line_width)    
+
     vertex_multiselect(['top_line'])
     vertex_transform(vehicle_bmesh, z=top_line_height)
 
@@ -209,8 +216,6 @@ def make_vehicle(context):
     vertex_multiselect([],['greenhouse'], False)
     vertex_multiselect(['windshield_base','rearwindow_base'],['centerline','side'], False)
     vertex_transform(vehicle_bmesh, x=top_line_width/2)
-
-    hip_line_height = (shoulder_line_height+top_line_height) / 2.
 
     vertex_multiselect(['hip_line'])
     vertex_transform(vehicle_bmesh, z=hip_line_height)
