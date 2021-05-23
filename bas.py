@@ -191,7 +191,7 @@ def make_vehicle(context):
     vertex_transform(vehicle_bmesh, z=quarter_diam)
 
     vertex_multiselect(['mid_line'])
-    vertex_transform(vehicle_bmesh, z=half_diam)
+    vertex_transform(vehicle_bmesh, z=diam*2./3.) #half_diam)
 
     vertex_multiselect(['roof'])
     vertex_transform(vehicle_bmesh, z=height)
@@ -287,7 +287,7 @@ def make_vehicle(context):
     bpy.ops.view3d.snap_cursor_to_selected()
     bpy.context.scene.tool_settings.transform_pivot_point = 'CURSOR'
 
-    vertex_multiselect(['top_line','front'], ['bottom','mid_line'])
+    vertex_multiselect(['top_line','front'], ['bottom','mid_line','door_bottom_line'])
 
     bpy.ops.transform.rotate(value=wedge_rads, orient_axis='X')
 
@@ -295,10 +295,10 @@ def make_vehicle(context):
     vertex_transform(vehicle_bmesh, z=0.05, relative=True)
 
     front_slope_base = (shoulder_line_height-half_diam)*scene.FrontSlope
-    vertex_multiselect(['front'],['bottom','mid_line'])
+    vertex_multiselect(['front'],['bottom','mid_line','door_bottom_line'])
     vertex_transform(vehicle_bmesh, z=-(front_slope_base)*(2./3.), relative=True)
 
-    vertex_multiselect(['front_wheel_front_well'],['front_wheel_arch','bottom','mid_line','shoulder_line'])
+    vertex_multiselect(['front_wheel_front_well'],['front_wheel_arch','bottom','mid_line','shoulder_line','door_bottom_line'])
     vertex_transform(vehicle_bmesh, z=-(front_slope_base)*(1./3.), relative=True)
 
     vertex_multiselect(['front_wheel'],['front_wheel_arch','front_wheel_rear_well','front_wheel_front_well','shoulder_line','front_well_detail','rear_well_detail'])
