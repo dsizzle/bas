@@ -252,8 +252,8 @@ class OBJECT_MT_TirePresetMenu(bpy.types.Menu):
         layout.operator(WM_OT_235_45R18Type.bl_idname, text=WM_OT_235_45R18Type.bl_label)
         layout.operator(WM_OT_235_60R18Type.bl_idname, text=WM_OT_235_60R18Type.bl_label)
         layout.operator(WM_OT_245_60R18Type.bl_idname, text=WM_OT_245_60R18Type.bl_label)
-        layout.operator(WM_OT_235_40R19Type.bl_idname, text=WM_OT_235_60R18Type.bl_label)
-        layout.operator(WM_OT_275_55R20Type.bl_idname, text=WM_OT_235_60R18Type.bl_label)
+        layout.operator(WM_OT_235_40R19Type.bl_idname, text=WM_OT_235_40R19Type.bl_label)
+        layout.operator(WM_OT_275_55R20Type.bl_idname, text=WM_OT_275_55R20Type.bl_label)
 
 
 # Set up panel layout
