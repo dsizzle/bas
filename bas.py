@@ -10,8 +10,8 @@ import math
 from .mesh_utils import *
 
 def make_wheel(tire_obj, tire_diam, tire_width, wheel_diam):
-    sidewall_diam = tire_diam * 3. / 4.
-    
+    sidewall_diam = (tire_diam+wheel_diam)/2.
+
     bpy.ops.object.select_all(action='DESELECT')
     tire_obj.select_set(True)
     bpy.context.view_layer.objects.active = tire_obj
@@ -29,7 +29,7 @@ def make_wheel(tire_obj, tire_diam, tire_width, wheel_diam):
     bpy.ops.object.vertex_group_set_active(group='tire_sidewall_vertices')
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.vertex_group_select()
-    bpy.ops.transform.resize(value=(sidewall_diam, sidewall_diam, 1.0), constraint_axis=(True, True, False))        
+    bpy.ops.transform.resize(value=(sidewall_diam * 1.375, sidewall_diam * 1.375, 1.0), constraint_axis=(True, True, False))        
     bpy.ops.object.vertex_group_set_active(group='tire_profile_vertices')
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.vertex_group_select()
