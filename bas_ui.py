@@ -66,8 +66,8 @@ class WM_OT_LuxurySedanType(bpy.types.Operator):
         scene = context.scene
 
         scene.TireWidth = 235
-        scene.TireSidewall = 60
-        scene.WheelDiameter = 18
+        scene.TireSidewall = 40
+        scene.WheelDiameter = 19
 
         scene.Wheelbase = 3.75
         scene.FrontOverhang = 0.75
@@ -93,9 +93,9 @@ class WM_OT_SportsGTType(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
 
-        scene.TireWidth = 235
-        scene.TireSidewall = 40
-        scene.WheelDiameter = 19
+        scene.TireWidth = 275
+        scene.TireSidewall = 55
+        scene.WheelDiameter = 20
 
         scene.Wheelbase = 2.8
         scene.FrontOverhang = 0.5
@@ -121,9 +121,9 @@ class WM_OT_SportsMidEngineType(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
 
-        scene.TireWidth = 275
-        scene.TireSidewall = 55
-        scene.WheelDiameter = 20
+        scene.TireWidth = 235
+        scene.TireSidewall = 45
+        scene.WheelDiameter = 18
 
         scene.Wheelbase = 2.75
         scene.FrontOverhang = 0.75
